@@ -4,32 +4,34 @@
 */
 
 import React from 'react';
-import { LightBulbIcon } from './icons';
+import { RobotIcon } from './icons';
 import Spinner from './Spinner';
+import type { UIStrings } from '../i18n';
 
 interface SuggestionsPanelProps {
   suggestions: { name: string; prompt: string }[];
   onApplySuggestion: (prompt: string) => void;
   isLoading: boolean;
+  uiStrings: UIStrings;
 }
 
-const SuggestionsPanel: React.FC<SuggestionsPanelProps> = ({ suggestions, onApplySuggestion, isLoading }) => {
+const SuggestionsPanel: React.FC<SuggestionsPanelProps> = ({ suggestions, onApplySuggestion, isLoading, uiStrings }) => {
   return (
     <div className="w-full bg-black/30 border border-purple-800/50 rounded-lg p-6 flex flex-col items-center gap-4 animate-fade-in backdrop-blur-sm text-center">
       <div className="w-16 h-16 bg-purple-900/50 rounded-full flex items-center justify-center mb-2">
-        <LightBulbIcon className="w-9 h-9 text-purple-400" />
+        <RobotIcon className="w-9 h-9 text-purple-400" />
       </div>
-      <h3 className="text-xl font-bold text-gray-200">AI Suggestions</h3>
+      <h3 className="text-xl font-bold text-gray-200">{uiStrings.suggestionsPanelTitle}</h3>
 
       {isLoading ? (
         <div className="flex flex-col items-center gap-2 py-4">
             <Spinner />
-            <p className="text-md text-gray-400">Analyzing your image for improvements...</p>
+            <p className="text-md text-gray-400">{uiStrings.suggestionsLoading}</p>
         </div>
       ) : (
         <>
             <p className="text-md text-gray-400 max-w-md">
-                Here are a few AI-powered suggestions to enhance your photo.
+                {uiStrings.suggestionsDescription}
             </p>
             <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
                 {suggestions.map((suggestion, index) => (

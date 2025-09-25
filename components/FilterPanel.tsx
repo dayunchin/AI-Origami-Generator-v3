@@ -4,13 +4,15 @@
 */
 
 import React, { useState } from 'react';
+import type { UIStrings } from '../i18n';
 
 interface FilterPanelProps {
   onApplyFilter: (prompt: string) => void;
   isLoading: boolean;
+  uiStrings: UIStrings;
 }
 
-const FilterPanel: React.FC<FilterPanelProps> = ({ onApplyFilter, isLoading }) => {
+const FilterPanel: React.FC<FilterPanelProps> = ({ onApplyFilter, isLoading, uiStrings }) => {
   const [selectedPresetPrompt, setSelectedPresetPrompt] = useState<string | null>(null);
   const [customPrompt, setCustomPrompt] = useState('');
 
@@ -45,7 +47,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ onApplyFilter, isLoading }) =
 
   return (
     <div className="w-full bg-black/30 border border-purple-800/50 rounded-lg p-4 flex flex-col gap-4 animate-fade-in backdrop-blur-sm">
-      <h3 className="text-lg font-semibold text-center text-gray-300">Apply a Filter</h3>
+      <h3 className="text-lg font-semibold text-center text-gray-300">{uiStrings.filterPanelTitle}</h3>
       
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {presets.map(preset => (
@@ -64,7 +66,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ onApplyFilter, isLoading }) =
         type="text"
         value={customPrompt}
         onChange={handleCustomChange}
-        placeholder="Or describe a custom filter (e.g., '80s synthwave glow')"
+        placeholder={uiStrings.filterPlaceholder}
         className="flex-grow bg-purple-950/20 border border-purple-800/60 text-gray-200 rounded-lg p-4 focus:ring-2 focus:ring-purple-500 focus:outline-none transition w-full disabled:cursor-not-allowed disabled:opacity-60 text-base"
         disabled={isLoading}
       />
@@ -76,7 +78,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ onApplyFilter, isLoading }) =
             className="w-full bg-gradient-to-br from-purple-600 to-pink-500 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner text-base disabled:from-purple-800 disabled:to-pink-700 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none"
             disabled={isLoading || !activePrompt.trim()}
           >
-            Apply Filter
+            {uiStrings.applyFilter}
           </button>
         </div>
       )}

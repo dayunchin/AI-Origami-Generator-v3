@@ -365,3 +365,42 @@ export const transferStyle = async (
   
   return handleApiResponse(response, 'style transfer');
 };
+
+
+/**
+ * Translates a JSON object of UI strings into a target language.
+ * @param strings The object containing English strings.
+ * @param targetLanguage The language code (e.g., 'es', 'fr') to translate to.
+ * @returns A promise that resolves to the translated object.
+ */
+export const translateText = async (
+  strings: object,
+  targetLanguage: string
+): Promise<object> => {
+  console.log(`Translating UI to ${targetLanguage}`);
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+  
+  const prompt = `Translate the values of the following JSON object into the language with code "${targetLanguage}". Maintain the exact JSON structure and keys. Only translate the string values. Do not translate placeholder variables like {currentStep} or {totalSteps}.
+  
+Input JSON:
+${JSON.stringify(strings, null, 2)}
+  
+Output the translated JSON only, enclosed in a single JSON code block.`;
+
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: prompt,
+    config: {
+      responseMimeType: 'application/json',
+    },
+  });
+
+  const jsonStr = response.text.trim();
+  try {
+    // It should be a valid JSON string because of responseMimeType
+    return JSON.parse(jsonStr);
+  } catch (e) {
+    console.error("Failed to parse translated JSON:", e, { jsonStr });
+    throw new Error(`The AI returned translated text in an invalid format for ${targetLanguage}.`);
+  }
+};

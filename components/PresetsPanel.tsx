@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { BookmarkIcon } from './icons';
+import type { UIStrings } from '../i18n';
 
 export interface Preset {
   name: string;
@@ -14,9 +15,10 @@ export interface Preset {
 interface PresetsPanelProps {
   history: { actionDescription?: string }[];
   onApplyPreset: (preset: Preset) => void;
+  uiStrings: UIStrings;
 }
 
-const PresetsPanel: React.FC<PresetsPanelProps> = ({ history, onApplyPreset }) => {
+const PresetsPanel: React.FC<PresetsPanelProps> = ({ history, onApplyPreset, uiStrings }) => {
   const [presets, setPresets] = useState<Preset[]>([]);
   const [presetName, setPresetName] = useState('');
 
@@ -65,16 +67,16 @@ const PresetsPanel: React.FC<PresetsPanelProps> = ({ history, onApplyPreset }) =
       <div className="w-16 h-16 bg-purple-900/50 rounded-full flex items-center justify-center mb-2">
         <BookmarkIcon className="w-9 h-9 text-purple-400" />
       </div>
-      <h3 className="text-xl font-bold text-gray-200">Custom Presets</h3>
+      <h3 className="text-xl font-bold text-gray-200">{uiStrings.presetsPanelTitle}</h3>
       
       <div className="w-full max-w-md border-b border-purple-700/50 pb-6 mb-4">
-        <p className="text-md text-gray-400 text-center mb-4">Save your current workflow as a reusable preset.</p>
+        <p className="text-md text-gray-400 text-center mb-4">{uiStrings.presetsSaveWorkflow}</p>
         <div className="flex items-center gap-2">
             <input
                 type="text"
                 value={presetName}
                 onChange={(e) => setPresetName(e.target.value)}
-                placeholder="Enter preset name"
+                placeholder={uiStrings.presetsEnterName}
                 className="flex-grow bg-purple-950/20 border border-purple-800/60 text-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none transition w-full"
                 disabled={history.length === 0}
             />
@@ -83,28 +85,28 @@ const PresetsPanel: React.FC<PresetsPanelProps> = ({ history, onApplyPreset }) =
                 disabled={!presetName.trim() || history.length === 0}
                 className="bg-purple-600 text-white font-semibold py-3 px-5 rounded-lg hover:bg-purple-500 transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
             >
-                Save
+                {uiStrings.presetsSave}
             </button>
         </div>
-        {history.length === 0 && <p className="text-xs text-gray-500 text-center mt-2">Apply at least one edit to save a preset.</p>}
+        {history.length === 0 && <p className="text-xs text-gray-500 text-center mt-2">{uiStrings.presetsSaveDisabled}</p>}
       </div>
 
       <div className="w-full max-w-md">
-        <h4 className="text-lg font-semibold text-gray-300 mb-2 text-center">Your Saved Presets</h4>
+        <h4 className="text-lg font-semibold text-gray-300 mb-2 text-center">{uiStrings.presetsYourSaved}</h4>
         {presets.length > 0 ? (
           <ul className="space-y-2">
             {presets.map(preset => (
               <li key={preset.name} className="bg-black/40 p-3 rounded-lg flex items-center justify-between">
                 <span className="font-medium text-gray-200">{preset.name}</span>
                 <div className="flex items-center gap-2">
-                    <button onClick={() => onApplyPreset(preset)} className="bg-green-600 text-white text-sm font-semibold py-1 px-3 rounded hover:bg-green-500 transition-colors">Apply</button>
-                    <button onClick={() => handleDeletePreset(preset.name)} className="bg-red-600 text-white text-sm font-semibold py-1 px-3 rounded hover:bg-red-500 transition-colors">Delete</button>
+                    <button onClick={() => onApplyPreset(preset)} className="bg-green-600 text-white text-sm font-semibold py-1 px-3 rounded hover:bg-green-500 transition-colors">{uiStrings.presetsApply}</button>
+                    <button onClick={() => handleDeletePreset(preset.name)} className="bg-red-600 text-white text-sm font-semibold py-1 px-3 rounded hover:bg-red-500 transition-colors">{uiStrings.presetsDelete}</button>
                 </div>
               </li>
             ))}
           </ul>
         ) : (
-          <p className="text-gray-500 text-center">You have no saved presets.</p>
+          <p className="text-gray-500 text-center">{uiStrings.presetsNone}</p>
         )}
       </div>
     </div>

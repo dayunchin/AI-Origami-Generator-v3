@@ -115,6 +115,20 @@ export const LightBulbIcon: React.FC<{ className?: string }> = ({ className }) =
     </svg>
 );
 
+export const RobotIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className={className}>
+      <rect x="7" y="4" width="10" height="7" rx="1.5" />
+      <circle cx="10.5" cy="7.5" r="1" />
+      <circle cx="13.5" cy="7.5" r="1" />
+      <rect x="7" y="12" width="10" height="5" rx="1" />
+      <path d="M10 13.5h4" />
+      <path d="M10 15h4" />
+      <path strokeLinecap="round" d="M7 13c-1.105 0-2 .895-2 2s.895 2 2 2" />
+      <path strokeLinecap="round" d="M17 13c1.105 0 2 .895 2 2s-.895 2-2 2" />
+      <rect x="9" y="18" width="6" height="3" rx="1" />
+    </svg>
+);
+
 export const PaintBrushIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 4.5l7.5 7.5-7.5 7.5-7.5-7.5 7.5-7.5z" />
@@ -130,8 +144,10 @@ export const BookmarkIcon: React.FC<{ className?: string }> = ({ className }) =>
     </svg>
 );
 
-export const RectangleStackIcon: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75 2.25 12l4.179 2.25m0-4.5a49.109 49.109 0 0 1 11.142 0m-11.142 0a49.109 49.109 0 0 0 11.142 0M6.429 9.75 2.25 12l4.179 2.25m0 0a49.109 49.109 0 0 1 11.142 0m-11.142 0a49.109 49.109 0 0 0 11.142 0m6.429-3.375L21.75 12l-4.179-2.25m0 4.5a49.109 49.109 0 0 0-11.142 0m11.142 0a49.109 49.109 0 0 1-11.142 0" />
+export const LayersIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 9h12v12H9z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h12v12H6z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h12v12H3z" />
     </svg>
 );

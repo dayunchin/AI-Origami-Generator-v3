@@ -6,8 +6,8 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import ReactCrop, { type Crop, type PixelCrop } from 'react-image-crop';
-import { generateEditedImage, generateFilteredImage, generateAdjustedImage, removeBackgroundImage, generateImageFromText, upscaleImage, expandImage, getEditSuggestions, transferStyle } from './services/geminiService';
-import Header from './components/Header';
+import { generateEditedImage, generateFilteredImage, generateAdjustedImage, removeBackgroundImage, generateImageFromText, upscaleImage, expandImage, getEditSuggestions, transferStyle, translateText } from './services/geminiService';
+import Header, { LANGUAGES } from './components/Header';
 import Spinner from './components/Spinner';
 import FilterPanel from './components/FilterPanel';
 import AdjustmentPanel from './components/AdjustmentPanel';
@@ -22,6 +22,8 @@ import SuggestionsPanel from './components/SuggestionsPanel';
 import StyleTransferPanel from './components/StyleTransferPanel';
 import PresetsPanel, { type Preset } from './components/PresetsPanel';
 import BatchEditor from './components/BatchEditor';
+import { englishStrings, type UIStrings } from './i18n';
+
 
 // Helper to convert a data URL string to a File object
 const dataURLtoFile = (dataurl: string, filename: string): File => {
@@ -41,9 +43,11 @@ const dataURLtoFile = (dataurl: string, filename: string): File => {
 }
 
 type AppMode = 'start' | 'single-image' | 'batch';
-type Tab = 'suggestions' | 'magic-edit' | 'adjust' | 'filters' | 'style-transfer' | 'presets' | 'crop' | 'remove-bg' | 'expand' | 'upscale';
+type Tab = 'suggestions' | 'magic-edit' | 'style-transfer' | 'presets' | 'adjust' | 'filters' | 'remove-bg' | 'crop' | 'expand' | 'upscale';
 type HistoryItem = { file: File; actionDescription?: string };
 type Suggestion = { name: string; prompt: string; };
+
+const TABS: Tab[] = ['suggestions', 'magic-edit', 'style-transfer', 'presets', 'adjust', 'filters', 'remove-bg', 'crop', 'expand', 'upscale'];
 
 const App: React.FC = () => {
   const [appMode, setAppMode] = useState<AppMode>('start');
@@ -64,6 +68,9 @@ const App: React.FC = () => {
 
   const [editSuggestions, setEditSuggestions] = useState<Suggestion[]>([]);
   const [styleImage, setStyleImage] = useState<File | null>(null);
+
+  const [uiStrings, setUiStrings] = useState<UIStrings>(englishStrings);
+  const [currentLanguage, setCurrentLanguage] = useState('en');
 
   const currentHistoryItem = history[historyIndex] ?? null;
   const currentImage = currentHistoryItem?.file ?? null;
@@ -132,7 +139,7 @@ const App: React.FC = () => {
     if (!currentImage || !prompt.trim() || !editHotspot) return;
     setIsLoading(true);
     setError(null);
-    setLoadingMessage('Performing localized edit...');
+    setLoadingMessage(uiStrings.loadingLocalizedEdit);
     try {
         const editedImageUrl = await generateEditedImage(currentImage, prompt, editHotspot);
         const newImageFile = dataURLtoFile(editedImageUrl, `edited-${Date.now()}.png`);
@@ -145,13 +152,13 @@ const App: React.FC = () => {
     } finally {
         setIsLoading(false);
     }
-  }, [currentImage, prompt, editHotspot, addImageToHistory]);
+  }, [currentImage, prompt, editHotspot, addImageToHistory, uiStrings]);
 
   const handleGenerateFromText = useCallback(async (textPrompt: string) => {
     if (!textPrompt.trim()) return;
     setIsLoading(true);
     setError(null);
-    setLoadingMessage('AI is generating your image...');
+    setLoadingMessage(uiStrings.loadingGeneratingImage);
     try {
       const generatedImageUrl = await generateImageFromText(textPrompt);
       const newImageFile = dataURLtoFile(generatedImageUrl, `generated-${Date.now()}.png`);
@@ -162,13 +169,13 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [handleImageUpload]);
+  }, [handleImageUpload, uiStrings]);
   
   const handleApplyFilter = useCallback(async (filterPrompt: string) => {
     if (!currentImage) return;
     setIsLoading(true);
     setError(null);
-    setLoadingMessage('Applying creative filter...');
+    setLoadingMessage(uiStrings.loadingFilter);
     try {
         const filteredImageUrl = await generateFilteredImage(currentImage, filterPrompt);
         const newImageFile = dataURLtoFile(filteredImageUrl, `filtered-${Date.now()}.png`);
@@ -179,13 +186,13 @@ const App: React.FC = () => {
     } finally {
         setIsLoading(false);
     }
-  }, [currentImage, addImageToHistory]);
+  }, [currentImage, addImageToHistory, uiStrings]);
   
   const handleApplyAdjustment = useCallback(async (adjustmentPrompt: string) => {
     if (!currentImage) return;
     setIsLoading(true);
     setError(null);
-    setLoadingMessage('Applying adjustment...');
+    setLoadingMessage(uiStrings.loadingAdjustment);
     try {
         const adjustedImageUrl = await generateAdjustedImage(currentImage, adjustmentPrompt);
         const newImageFile = dataURLtoFile(adjustedImageUrl, `adjusted-${Date.now()}.png`);
@@ -196,13 +203,13 @@ const App: React.FC = () => {
     } finally {
         setIsLoading(false);
     }
-  }, [currentImage, addImageToHistory]);
+  }, [currentImage, addImageToHistory, uiStrings]);
   
   const handleRemoveBackground = useCallback(async () => {
     if (!currentImage) return;
     setIsLoading(true);
     setError(null);
-    setLoadingMessage('Removing background...');
+    setLoadingMessage(uiStrings.loadingRemoveBg);
     try {
         const resultUrl = await removeBackgroundImage(currentImage);
         const newImageFile = dataURLtoFile(resultUrl, `bg-removed-${Date.now()}.png`);
@@ -213,7 +220,7 @@ const App: React.FC = () => {
     } finally {
         setIsLoading(false);
     }
-  }, [currentImage, addImageToHistory]);
+  }, [currentImage, addImageToHistory, uiStrings]);
 
   const handleApplyCrop = useCallback(() => {
     if (!completedCrop || !imgRef.current) return;
@@ -240,7 +247,7 @@ const App: React.FC = () => {
     if (!currentImage) return;
     setIsLoading(true);
     setError(null);
-    setLoadingMessage('Upscaling image...');
+    setLoadingMessage(uiStrings.loadingUpscale);
     try {
       const upscaledImageUrl = await upscaleImage(currentImage);
       const newImageFile = dataURLtoFile(upscaledImageUrl, `upscaled-${Date.now()}.png`);
@@ -251,13 +258,13 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [currentImage, addImageToHistory]);
+  }, [currentImage, addImageToHistory, uiStrings]);
 
   const handleExpand = useCallback(async ({ pixels, direction, expandPrompt }: ExpandParams) => {
     if (!currentImage || !currentImageUrl) return;
     setIsLoading(true);
     setError(null);
-    setLoadingMessage('Expanding canvas with AI...');
+    setLoadingMessage(uiStrings.loadingExpand);
     try {
         const img = new Image();
         img.src = currentImageUrl;
@@ -284,13 +291,13 @@ const App: React.FC = () => {
     } finally {
         setIsLoading(false);
     }
-  }, [currentImage, currentImageUrl, addImageToHistory]);
+  }, [currentImage, currentImageUrl, addImageToHistory, uiStrings]);
 
   const handleStyleTransfer = useCallback(async () => {
     if (!currentImage || !styleImage) return;
     setIsLoading(true);
     setError(null);
-    setLoadingMessage('Applying artistic style...');
+    setLoadingMessage(uiStrings.loadingStyleTransfer);
     try {
         const resultUrl = await transferStyle(currentImage, styleImage);
         const newImageFile = dataURLtoFile(resultUrl, `stylized-${Date.now()}.png`);
@@ -301,7 +308,7 @@ const App: React.FC = () => {
     } finally {
         setIsLoading(false);
     }
-  }, [currentImage, styleImage, addImageToHistory]);
+  }, [currentImage, styleImage, addImageToHistory, uiStrings]);
 
   const handleApplyPreset = useCallback(async (preset: Preset) => {
     if (!originalImage) return;
@@ -313,7 +320,10 @@ const App: React.FC = () => {
     let imageToProcess = originalImage;
     for (let i = 0; i < preset.actions.length; i++) {
         const action = preset.actions[i];
-        setLoadingMessage(`Applying preset... (Step ${i+1}/${preset.actions.length})`);
+        const loadingText = uiStrings.loadingPreset
+            .replace('{currentStep}', String(i + 1))
+            .replace('{totalSteps}', String(preset.actions.length));
+        setLoadingMessage(loadingText);
         try {
             const adjustedImageUrl = await generateAdjustedImage(imageToProcess, action.prompt);
             const newImageFile = dataURLtoFile(adjustedImageUrl, `preset-step-${i}-${Date.now()}.png`);
@@ -331,7 +341,7 @@ const App: React.FC = () => {
     }
     setIsLoading(false);
 
-  }, [originalImage, history]);
+  }, [originalImage, history, uiStrings]);
 
   const handleUndo = useCallback(() => {
     if (canUndo) setHistoryIndex(historyIndex - 1);
@@ -396,7 +406,115 @@ const App: React.FC = () => {
     setEditHotspot({ x: originalX, y: originalY });
   };
   
-  const TABS: Tab[] = ['suggestions', 'magic-edit', 'style-transfer', 'presets', 'adjust', 'filters', 'remove-bg', 'crop', 'expand', 'upscale'];
+  const handleLanguageChange = useCallback(async (langCode: string) => {
+    if (langCode === 'en') {
+        setUiStrings(englishStrings);
+        setCurrentLanguage('en');
+        localStorage.removeItem(`translated_ui_${currentLanguage}`);
+        localStorage.setItem('ui_language', 'en');
+        return;
+    }
+
+    try {
+        setIsLoading(true);
+        const languageName = LANGUAGES[langCode as keyof typeof LANGUAGES] || langCode;
+        setLoadingMessage(uiStrings.loadingTranslating.replace('{languageName}', languageName));
+        
+        const translationCache = localStorage.getItem(`translated_ui_${langCode}`);
+        
+        let translated: UIStrings;
+        if (translationCache) {
+            translated = JSON.parse(translationCache);
+        } else {
+            translated = await translateText(englishStrings, langCode) as UIStrings;
+            localStorage.setItem(`translated_ui_${langCode}`, JSON.stringify(translated));
+        }
+
+        setUiStrings(translated);
+        setCurrentLanguage(langCode);
+        localStorage.setItem('ui_language', langCode);
+
+    } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+        setError(`Failed to translate UI. ${errorMessage}`);
+    } finally {
+        setIsLoading(false);
+    }
+  }, [currentLanguage, uiStrings.loadingTranslating]);
+
+  useEffect(() => {
+      const savedLang = localStorage.getItem('ui_language');
+      if (savedLang && savedLang !== 'en') {
+          handleLanguageChange(savedLang);
+      }
+  }, []); // Run only once on initial mount
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isLoading) return; 
+
+      const isMac = navigator.platform.toUpperCase().includes('MAC');
+      const isCtrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
+
+      if (isCtrlOrCmd) {
+        switch (e.key.toLowerCase()) {
+          case 'z':
+            e.preventDefault();
+            if (e.shiftKey) { 
+              handleRedo();
+            } else { 
+              handleUndo();
+            }
+            break;
+          case 'y': 
+            if (!isMac) {
+              e.preventDefault();
+              handleRedo();
+            }
+            break;
+          case 'r':
+            e.preventDefault();
+            handleReset();
+            break;
+          case 'd':
+            e.preventDefault();
+            handleDownload();
+            break;
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        handleExitEditor();
+      } else if (e.altKey && !isNaN(parseInt(e.key))) {
+        e.preventDefault();
+        const tabIndex = e.key === '0' ? 9 : parseInt(e.key) - 1;
+        if (tabIndex >= 0 && tabIndex < TABS.length) {
+          setActiveTab(TABS[tabIndex]);
+        }
+      }
+    };
+    
+    if (appMode === 'single-image') {
+        window.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [appMode, isLoading, handleUndo, handleRedo, handleReset, handleDownload, handleExitEditor, setActiveTab]);
+  
+  const tabNames: Record<Tab, keyof UIStrings> = {
+    'suggestions': 'tabSuggestions',
+    'magic-edit': 'tabMagicEdit',
+    'style-transfer': 'tabStyleTransfer',
+    'presets': 'tabPresets',
+    'adjust': 'tabAdjust',
+    'filters': 'tabFilters',
+    'remove-bg': 'tabRemoveBg',
+    'crop': 'tabCrop',
+    'expand': 'tabExpand',
+    'upscale': 'tabUpscale',
+  };
+
 
   const renderSingleImageEditor = () => {
     if (!currentImageUrl) {
@@ -411,13 +529,13 @@ const App: React.FC = () => {
     if (error) {
        return (
            <div className="text-center animate-fade-in bg-red-500/10 border border-red-500/20 p-8 rounded-lg max-w-2xl mx-auto flex flex-col items-center gap-4">
-            <h2 className="text-2xl font-bold text-red-300">An Error Occurred</h2>
+            <h2 className="text-2xl font-bold text-red-300">{uiStrings.errorOccurred}</h2>
             <p className="text-md text-red-400">{error}</p>
             <button
                 onClick={() => setError(null)}
                 className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg text-md transition-colors"
               >
-                Try Again
+                {uiStrings.errorTryAgain}
             </button>
           </div>
         );
@@ -455,39 +573,39 @@ const App: React.FC = () => {
         <div className="w-full bg-black/30 border border-purple-800/50 rounded-lg p-2 flex items-center justify-center gap-1 flex-wrap backdrop-blur-sm">
             {TABS.map(tab => (
                  <button key={tab} onClick={() => setActiveTab(tab)} className={`flex-grow capitalize font-semibold py-3 px-4 rounded-md transition-all duration-200 text-sm md:text-base ${ activeTab === tab ? 'bg-gradient-to-br from-purple-600 to-pink-500 text-white shadow-lg shadow-pink-500/40' : 'text-gray-300 hover:text-white hover:bg-white/10'}`}>
-                    {tab.replace('-', ' ')}
+                    {uiStrings[tabNames[tab]]}
                 </button>
             ))}
         </div>
         
         <div className="w-full">
-            {activeTab === 'suggestions' && <SuggestionsPanel suggestions={editSuggestions} onApplySuggestion={handleApplyAdjustment} isLoading={isLoading || editSuggestions.length === 0} />}
+            {activeTab === 'suggestions' && <SuggestionsPanel suggestions={editSuggestions} onApplySuggestion={handleApplyAdjustment} isLoading={isLoading || editSuggestions.length === 0} uiStrings={uiStrings} />}
             {activeTab === 'magic-edit' && (
                 <div className="flex flex-col items-center gap-4">
-                    <p className="text-md text-gray-400">{editHotspot ? 'Great! Now describe your localized edit below.' : 'Click an area on the image to make a precise edit.'}</p>
+                    <p className="text-md text-gray-400">{editHotspot ? uiStrings.magicEditPromptReady : uiStrings.magicEditPromptClick}</p>
                     <form onSubmit={(e) => { e.preventDefault(); handleGenerate(); }} className="w-full flex items-center gap-2">
-                        <input type="text" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder={editHotspot ? "e.g., 'change my shirt color to blue'" : "First click a point on the image"} className="flex-grow bg-purple-950/20 border border-purple-800/60 text-gray-200 rounded-lg p-5 text-lg focus:ring-2 focus:ring-purple-500 focus:outline-none transition w-full disabled:cursor-not-allowed disabled:opacity-60" disabled={isLoading || !editHotspot} />
-                        <button type="submit" className="bg-gradient-to-br from-purple-600 to-pink-500 text-white font-bold py-5 px-8 text-lg rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner disabled:from-purple-800 disabled:to-pink-700 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none" disabled={isLoading || !prompt.trim() || !editHotspot}>Generate</button>
+                        <input type="text" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder={editHotspot ? uiStrings.magicEditPlaceholderReady : uiStrings.magicEditPlaceholderClick} className="flex-grow bg-purple-950/20 border border-purple-800/60 text-gray-200 rounded-lg p-5 text-lg focus:ring-2 focus:ring-purple-500 focus:outline-none transition w-full disabled:cursor-not-allowed disabled:opacity-60" disabled={isLoading || !editHotspot} />
+                        <button type="submit" className="bg-gradient-to-br from-purple-600 to-pink-500 text-white font-bold py-5 px-8 text-lg rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner disabled:from-purple-800 disabled:to-pink-700 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none" disabled={isLoading || !prompt.trim() || !editHotspot}>{uiStrings.generate}</button>
                     </form>
                 </div>
             )}
-            {activeTab === 'style-transfer' && <StyleTransferPanel onStyleTransfer={handleStyleTransfer} onSetStyleImage={setStyleImage} styleImage={styleImage} isLoading={isLoading} />}
-            {activeTab === 'presets' && <PresetsPanel history={history.slice(1, historyIndex + 1)} onApplyPreset={handleApplyPreset} />}
-            {activeTab === 'expand' && <ExpandPanel onExpand={handleExpand} isLoading={isLoading} />}
-            {activeTab === 'upscale' && <UpscalePanel onUpscale={handleUpscale} isLoading={isLoading} />}
-            {activeTab === 'crop' && <CropPanel onApplyCrop={handleApplyCrop} onSetAspect={setAspect} isLoading={isLoading} isCropping={!!completedCrop?.width && completedCrop.width > 0} />}
-            {activeTab === 'adjust' && <AdjustmentPanel onApplyAdjustment={handleApplyAdjustment} isLoading={isLoading} />}
-            {activeTab === 'filters' && <FilterPanel onApplyFilter={handleApplyFilter} isLoading={isLoading} />}
-            {activeTab === 'remove-bg' && <RemoveBgPanel onRemoveBackground={handleRemoveBackground} isLoading={isLoading} />}
+            {activeTab === 'style-transfer' && <StyleTransferPanel onStyleTransfer={handleStyleTransfer} onSetStyleImage={setStyleImage} styleImage={styleImage} isLoading={isLoading} uiStrings={uiStrings} />}
+            {activeTab === 'presets' && <PresetsPanel history={history.slice(1, historyIndex + 1)} onApplyPreset={handleApplyPreset} uiStrings={uiStrings} />}
+            {activeTab === 'expand' && <ExpandPanel onExpand={handleExpand} isLoading={isLoading} uiStrings={uiStrings} />}
+            {activeTab === 'upscale' && <UpscalePanel onUpscale={handleUpscale} isLoading={isLoading} uiStrings={uiStrings} />}
+            {activeTab === 'crop' && <CropPanel onApplyCrop={handleApplyCrop} onSetAspect={setAspect} isLoading={isLoading} isCropping={!!completedCrop?.width && completedCrop.width > 0} uiStrings={uiStrings} />}
+            {activeTab === 'adjust' && <AdjustmentPanel onApplyAdjustment={handleApplyAdjustment} isLoading={isLoading} uiStrings={uiStrings} />}
+            {activeTab === 'filters' && <FilterPanel onApplyFilter={handleApplyFilter} isLoading={isLoading} uiStrings={uiStrings} />}
+            {activeTab === 'remove-bg' && <RemoveBgPanel onRemoveBackground={handleRemoveBackground} isLoading={isLoading} uiStrings={uiStrings} />}
         </div>
         
         <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
-            <button onClick={handleUndo} disabled={!canUndo} className="flex items-center justify-center text-center bg-white/10 border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md transition-all duration-200 ease-in-out hover:bg-white/20 hover:border-white/30 active:scale-95 text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-white/5" aria-label="Undo last action"><UndoIcon className="w-5 h-5 mr-2" />Undo</button>
-            <button onClick={handleRedo} disabled={!canRedo} className="flex items-center justify-center text-center bg-white/10 border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md transition-all duration-200 ease-in-out hover:bg-white/20 hover:border-white/30 active:scale-95 text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-white/5" aria-label="Redo last action"><RedoIcon className="w-5 h-5 mr-2" />Redo</button>
+            <button onClick={handleUndo} disabled={!canUndo} className="flex items-center justify-center text-center bg-white/10 border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md transition-all duration-200 ease-in-out hover:bg-white/20 hover:border-white/30 active:scale-95 text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-white/5" aria-label="Undo last action"><UndoIcon className="w-5 h-5 mr-2" />{uiStrings.undo}</button>
+            <button onClick={handleRedo} disabled={!canRedo} className="flex items-center justify-center text-center bg-white/10 border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md transition-all duration-200 ease-in-out hover:bg-white/20 hover:border-white/30 active:scale-95 text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-white/5" aria-label="Redo last action"><RedoIcon className="w-5 h-5 mr-2" />{uiStrings.redo}</button>
             <div className="h-6 w-px bg-gray-600 mx-1 hidden sm:block"></div>
-            <button onClick={handleReset} disabled={!canUndo} className="text-center bg-transparent border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md transition-all duration-200 ease-in-out hover:bg-white/10 hover:border-white/30 active:scale-95 text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-transparent">Reset</button>
-            <button onClick={handleExitEditor} className="text-center bg-white/10 border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md transition-all duration-200 ease-in-out hover:bg-white/20 hover:border-white/30 active:scale-95 text-base">Exit Editor</button>
-            <button onClick={handleDownload} className="flex-grow sm:flex-grow-0 ml-auto bg-gradient-to-br from-green-600 to-green-500 text-white font-bold py-3 px-5 rounded-md transition-all duration-300 ease-in-out shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner text-base">Download Image</button>
+            <button onClick={handleReset} disabled={!canUndo} className="text-center bg-transparent border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md transition-all duration-200 ease-in-out hover:bg-white/10 hover:border-white/30 active:scale-95 text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-transparent">{uiStrings.reset}</button>
+            <button onClick={handleExitEditor} className="text-center bg-white/10 border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md transition-all duration-200 ease-in-out hover:bg-white/20 hover:border-white/30 active:scale-95 text-base">{uiStrings.exitEditor}</button>
+            <button onClick={handleDownload} className="flex-grow sm:flex-grow-0 ml-auto bg-gradient-to-br from-green-600 to-green-500 text-white font-bold py-3 px-5 rounded-md transition-all duration-300 ease-in-out shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner text-base">{uiStrings.downloadImage}</button>
         </div>
       </div>
     );
@@ -498,10 +616,10 @@ const App: React.FC = () => {
         case 'single-image':
             return renderSingleImageEditor();
         case 'batch':
-            return <BatchEditor onExit={handleExitEditor} />;
+            return <BatchEditor onExit={handleExitEditor} uiStrings={uiStrings} />;
         case 'start':
         default:
-            if (isLoading) { // For text-to-image generation
+            if (isLoading) { // For text-to-image generation or translation
                 return (
                     <div className="flex flex-col items-center justify-center gap-4 animate-fade-in">
                         <Spinner />
@@ -512,19 +630,19 @@ const App: React.FC = () => {
             if (error) {
                return (
                    <div className="text-center animate-fade-in bg-red-500/10 border border-red-500/20 p-8 rounded-lg max-w-2xl mx-auto flex flex-col items-center gap-4">
-                    <h2 className="text-2xl font-bold text-red-300">An Error Occurred</h2>
+                    <h2 className="text-2xl font-bold text-red-300">{uiStrings.errorOccurred}</h2>
                     <p className="text-md text-red-400">{error}</p>
-                    <button onClick={() => { setError(null); handleExitEditor();}} className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg text-md transition-colors">Try Again</button>
+                    <button onClick={() => { setError(null); handleExitEditor();}} className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg text-md transition-colors">{uiStrings.errorTryAgain}</button>
                   </div>
                 );
             }
-            return <StartScreen onFileSelect={handleFileSelect} onTextGenerate={handleGenerateFromText} onBatchEditClick={() => setAppMode('batch')} />;
+            return <StartScreen onFileSelect={handleFileSelect} onTextGenerate={handleGenerateFromText} onBatchEditClick={() => setAppMode('batch')} uiStrings={uiStrings} />;
     }
   };
 
   return (
     <div className="min-h-screen text-gray-100 flex flex-col">
-      <Header />
+      <Header uiStrings={uiStrings} onLanguageChange={handleLanguageChange} currentLanguage={currentLanguage} />
       <main className={`flex-grow w-full max-w-[1600px] mx-auto p-4 md:p-8 flex justify-center ${appMode !== 'start' ? 'items-start' : 'items-center'}`}>
         {renderContent()}
       </main>

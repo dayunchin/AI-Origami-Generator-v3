@@ -8,9 +8,11 @@ import JSZip from 'jszip';
 import { generateFilteredImage, generateAdjustedImage, removeBackgroundImage } from '../services/geminiService';
 import { UploadIcon } from './icons';
 import Spinner from './Spinner';
+import type { UIStrings } from '../i18n';
 
 interface BatchEditorProps {
     onExit: () => void;
+    uiStrings: UIStrings;
 }
 
 type ImageStatus = 'pending' | 'processing' | 'done' | 'error';
@@ -28,7 +30,7 @@ type Action = {
     type: ActionType;
 };
 
-const ACTIONS: Action[] = [
+const getActions = (uiStrings: UIStrings): Action[] => [
     // Filters
     { name: 'Synthwave Filter', prompt: 'Apply a vibrant 80s synthwave aesthetic with neon magenta and cyan glows, and subtle scan lines.', type: 'filter' },
     { name: 'Anime Filter', prompt: 'Give the image a vibrant Japanese anime style, with bold outlines, cel-shading, and saturated colors.', type: 'filter' },
@@ -38,10 +40,10 @@ const ACTIONS: Action[] = [
     { name: 'Steampunk Filter', prompt: 'Apply a steampunk aesthetic to the image, with brass and copper tones, intricate gears, and a Victorian industrial feel.', type: 'filter' },
     { name: 'Double Exposure Filter', prompt: 'Create a surreal double exposure effect, blending the main subject with a misty forest landscape.', type: 'filter' },
     // Adjustments
-    { name: 'Enhance Details', prompt: 'Slightly enhance the sharpness and details of the image without making it look unnatural.', type: 'adjustment' },
-    { name: 'Warmer Lighting', prompt: 'Adjust the color temperature to give the image warmer, golden-hour style lighting.', type: 'adjustment' },
+    { name: uiStrings.adjEnhance, prompt: 'Slightly enhance the sharpness and details of the image without making it look unnatural.', type: 'adjustment' },
+    { name: uiStrings.adjWarmer, prompt: 'Adjust the color temperature to give the image warmer, golden-hour style lighting.', type: 'adjustment' },
     // Features
-    { name: 'Remove Background', type: 'remove-bg' },
+    { name: uiStrings.removeBackground, type: 'remove-bg' },
 ];
 
 // Helper to convert a data URL string to a File object
@@ -58,7 +60,8 @@ const dataURLtoFile = (dataurl: string, filename: string): File => {
     return new File([u8arr], filename, {type:mime});
 }
 
-const BatchEditor: React.FC<BatchEditorProps> = ({ onExit }) => {
+const BatchEditor: React.FC<BatchEditorProps> = ({ onExit, uiStrings }) => {
+    const ACTIONS = getActions(uiStrings);
     const [imageJobs, setImageJobs] = useState<ImageJob[]>([]);
     const [selectedAction, setSelectedAction] = useState<Action>(ACTIONS[0]);
     const [isProcessing, setIsProcessing] = useState(false);
@@ -152,28 +155,28 @@ const BatchEditor: React.FC<BatchEditorProps> = ({ onExit }) => {
             <input type="file" multiple ref={fileInputRef} className="hidden" accept="image/*" onChange={(e) => handleFileSelect(e.target.files)} />
             
             <div className="text-center">
-                <h1 className="text-4xl font-bold">Batch Editor</h1>
-                <p className="text-gray-400 mt-2">Apply one action to many images at once.</p>
+                <h1 className="text-4xl font-bold">{uiStrings.batchEditorTitle}</h1>
+                <p className="text-gray-400 mt-2">{uiStrings.batchEditorDescription}</p>
             </div>
 
             <div className="w-full bg-black/30 border border-purple-800/50 rounded-lg p-4 flex flex-col md:flex-row items-center justify-between gap-4 backdrop-blur-sm">
                 <div className="flex flex-col w-full md:w-auto">
-                    <label htmlFor="action-select" className="text-sm font-medium text-gray-300 mb-1">Select Action</label>
+                    <label htmlFor="action-select" className="text-sm font-medium text-gray-300 mb-1">{uiStrings.batchSelectAction}</label>
                     <select id="action-select" value={selectedAction.name} onChange={e => setSelectedAction(ACTIONS.find(a => a.name === e.target.value)!)} disabled={isProcessing} className="w-full bg-purple-950/20 border border-purple-800/60 text-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none transition">
                         {ACTIONS.map(action => <option key={action.name} value={action.name} className="bg-purple-800 text-gray-200">{action.name}</option>)}
                     </select>
                 </div>
                 <button onClick={processImages} disabled={isProcessing || imageJobs.length === 0} className="w-full md:w-auto bg-gradient-to-br from-purple-600 to-pink-500 text-white font-bold py-3 px-8 text-lg rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/40 hover:-translate-y-px active:scale-95 disabled:from-gray-600 disabled:shadow-none disabled:cursor-not-allowed">
-                    {isProcessing ? 'Processing...' : `Process ${imageJobs.length} Images`}
+                    {isProcessing ? uiStrings.batchProcessing : uiStrings.batchProcess.replace('{count}', String(imageJobs.length))}
                 </button>
             </div>
             
             {imageJobs.length === 0 ? (
                 <div className="w-full text-center py-20 bg-black/20 border-2 border-dashed border-purple-700/60 rounded-xl flex flex-col items-center justify-center gap-4">
                      <UploadIcon className="w-12 h-12 text-gray-500" />
-                     <h3 className="text-xl font-semibold">No images selected</h3>
-                     <p className="text-gray-400">Click below to add images to the batch.</p>
-                     <button onClick={() => fileInputRef.current?.click()} className="mt-2 bg-white/10 text-white font-semibold py-2 px-5 rounded-md hover:bg-white/20 transition-colors">Select Images</button>
+                     <h3 className="text-xl font-semibold">{uiStrings.batchNoImages}</h3>
+                     <p className="text-gray-400">{uiStrings.batchAddMore}</p>
+                     <button onClick={() => fileInputRef.current?.click()} className="mt-2 bg-white/10 text-white font-semibold py-2 px-5 rounded-md hover:bg-white/20 transition-colors">{uiStrings.batchSelectImages}</button>
                 </div>
             ) : (
                 <div className="w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -182,8 +185,8 @@ const BatchEditor: React.FC<BatchEditorProps> = ({ onExit }) => {
             )}
             
             <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
-                <button onClick={onExit} className="text-center bg-white/10 border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md hover:bg-white/20">Exit Batch Editor</button>
-                {allFinished && <button onClick={handleDownloadAll} className="bg-gradient-to-br from-green-600 to-green-500 text-white font-bold py-3 px-5 rounded-md shadow-lg shadow-green-500/20 hover:shadow-xl">Download All (.zip)</button>}
+                <button onClick={onExit} className="text-center bg-white/10 border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md hover:bg-white/20">{uiStrings.batchExit}</button>
+                {allFinished && <button onClick={handleDownloadAll} className="bg-gradient-to-br from-green-600 to-green-500 text-white font-bold py-3 px-5 rounded-md shadow-lg shadow-green-500/20 hover:shadow-xl">{uiStrings.batchDownloadAll}</button>}
             </div>
         </div>
     );

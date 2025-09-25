@@ -5,17 +5,19 @@
 
 import React from 'react';
 import { UserCircleIcon } from './icons';
+import type { UIStrings } from '../i18n';
 
 interface PortraitPanelProps {
   onApplyAdjustment: (prompt: string) => void;
   isLoading: boolean;
+  uiStrings: UIStrings;
 }
 
-const PortraitPanel: React.FC<PortraitPanelProps> = ({ onApplyAdjustment, isLoading }) => {
+const PortraitPanel: React.FC<PortraitPanelProps> = ({ onApplyAdjustment, isLoading, uiStrings }) => {
   const presets = [
-    { name: 'Studio Light', prompt: 'Add dramatic, professional studio lighting to the main subject.' },
-    { name: 'Smooth Skin', prompt: 'Perform subtle and natural skin smoothing on the faces in the portrait, reducing blemishes while preserving skin texture.' },
-    { name: 'Fix Gaze', prompt: 'Subtly adjust the eyes of the person in the portrait to look directly at the camera.' },
+    { name: uiStrings.portraitStudioLight, prompt: 'Add dramatic, professional studio lighting to the main subject.' },
+    { name: uiStrings.portraitSmoothSkin, prompt: 'Perform subtle and natural skin smoothing on the faces in the portrait, reducing blemishes while preserving skin texture.' },
+    { name: uiStrings.portraitFixGaze, prompt: 'Subtly adjust the eyes of the person in the portrait to look directly at the camera.' },
   ];
 
   return (
@@ -23,9 +25,9 @@ const PortraitPanel: React.FC<PortraitPanelProps> = ({ onApplyAdjustment, isLoad
       <div className="w-16 h-16 bg-purple-900/50 rounded-full flex items-center justify-center mb-2">
         <UserCircleIcon className="w-9 h-9 text-purple-400" />
       </div>
-      <h3 className="text-xl font-bold text-gray-200">Smart Portrait Tools</h3>
+      <h3 className="text-xl font-bold text-gray-200">{uiStrings.portraitPanelTitle}</h3>
       <p className="text-md text-gray-400 max-w-md">
-        Apply one-click professional enhancements to your portraits.
+        {uiStrings.portraitPanelDescription}
       </p>
 
       <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">

@@ -5,15 +5,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { PaintBrushIcon, UploadIcon } from './icons';
+import type { UIStrings } from '../i18n';
 
 interface StyleTransferPanelProps {
   onStyleTransfer: () => void;
   onSetStyleImage: (file: File | null) => void;
   styleImage: File | null;
   isLoading: boolean;
+  uiStrings: UIStrings;
 }
 
-const StyleTransferPanel: React.FC<StyleTransferPanelProps> = ({ onStyleTransfer, onSetStyleImage, styleImage, isLoading }) => {
+const StyleTransferPanel: React.FC<StyleTransferPanelProps> = ({ onStyleTransfer, onSetStyleImage, styleImage, isLoading, uiStrings }) => {
   const [styleImageUrl, setStyleImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -37,9 +39,9 @@ const StyleTransferPanel: React.FC<StyleTransferPanelProps> = ({ onStyleTransfer
       <div className="w-16 h-16 bg-purple-900/50 rounded-full flex items-center justify-center mb-2">
         <PaintBrushIcon className="w-9 h-9 text-purple-400" />
       </div>
-      <h3 className="text-xl font-bold text-gray-200">AI Style Transfer</h3>
+      <h3 className="text-xl font-bold text-gray-200">{uiStrings.styleTransferPanelTitle}</h3>
       <p className="text-md text-gray-400 max-w-md">
-        Upload a style image (like a painting or pattern) to apply its visual aesthetic to your photo.
+        {uiStrings.styleTransferDescription}
       </p>
 
       <div className="w-full max-w-sm mt-4 flex flex-col items-center gap-4">
@@ -50,7 +52,7 @@ const StyleTransferPanel: React.FC<StyleTransferPanelProps> = ({ onStyleTransfer
             ) : (
                 <>
                     <UploadIcon className="w-10 h-10 mb-2" />
-                    <span>Click to upload Style Image</span>
+                    <span>{uiStrings.styleTransferUpload}</span>
                 </>
             )}
           </div>
@@ -62,7 +64,7 @@ const StyleTransferPanel: React.FC<StyleTransferPanelProps> = ({ onStyleTransfer
           disabled={isLoading || !styleImage}
           className="w-full bg-gradient-to-br from-purple-600 to-pink-500 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner text-lg disabled:from-purple-800 disabled:to-pink-700 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none"
         >
-          Apply Style
+          {uiStrings.applyStyle}
         </button>
       </div>
     </div>

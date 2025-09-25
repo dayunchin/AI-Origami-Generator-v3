@@ -4,16 +4,19 @@
 */
 
 import React, { useState, useEffect } from 'react';
-import { UploadIcon, MagicWandIcon, RectangleStackIcon } from './icons';
+import { UploadIcon, MagicWandIcon, LayersIcon } from './icons';
+import type { UIStrings } from '../i18n';
 
 interface StartScreenProps {
   onFileSelect: (files: FileList | null) => void;
   onTextGenerate: (prompt: string) => void;
   onBatchEditClick: () => void;
+  uiStrings: UIStrings;
 }
 
 const promptCategories = [
     {
+        nameKey: 'origamiType' as keyof UIStrings,
         name: 'Origami Type',
         limit: 2,
         words: [
@@ -37,6 +40,7 @@ const promptCategories = [
         ].sort()
     },
     {
+        nameKey: 'shape' as keyof UIStrings,
         name: 'Shape',
         limit: 2,
         words: [
@@ -49,6 +53,7 @@ const promptCategories = [
         ].sort()
     },
     {
+        nameKey: 'color' as keyof UIStrings,
         name: 'Color',
         limit: 3,
         words: [
@@ -58,6 +63,7 @@ const promptCategories = [
         ].sort()
     },
     {
+        nameKey: 'material' as keyof UIStrings,
         name: 'Material',
         limit: 2,
         words: [
@@ -68,6 +74,7 @@ const promptCategories = [
         ].sort()
     },
     {
+        nameKey: 'style' as keyof UIStrings,
         name: 'Style',
         limit: 2,
         words: [
@@ -78,6 +85,7 @@ const promptCategories = [
         ].sort()
     },
     {
+        nameKey: 'details' as keyof UIStrings,
         name: 'Details',
         limit: 3,
         words: [
@@ -88,6 +96,7 @@ const promptCategories = [
         ].sort()
     },
     {
+        nameKey: 'adjustive' as keyof UIStrings,
         name: 'Adjustive',
         limit: 1,
         words: [
@@ -98,7 +107,7 @@ const promptCategories = [
 ];
 
 
-const StartScreen: React.FC<StartScreenProps> = ({ onFileSelect, onTextGenerate, onBatchEditClick }) => {
+const StartScreen: React.FC<StartScreenProps> = ({ onFileSelect, onTextGenerate, onBatchEditClick, uiStrings }) => {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [prompt, setPrompt] = useState('Origami,');
   const [selectedWords, setSelectedWords] = useState<Record<string, string[]>>({});
@@ -223,17 +232,17 @@ const StartScreen: React.FC<StartScreenProps> = ({ onFileSelect, onTextGenerate,
     <div className="w-full max-w-7xl mx-auto text-center p-4 md:p-8 animate-fade-in">
       <div className="flex flex-col items-center gap-6">
         <h1 className="text-4xl font-extrabold tracking-tight text-gray-100 sm:text-5xl md:text-6xl">
-          AI Origami Generator v3
+          {uiStrings.startScreenTitle}
         </h1>
         <p className="max-w-3xl text-lg text-gray-400 md:text-xl">
-          This AI tool is for designing digital origami. It does not provide folding instructions, diagrams, or crease patterns for creating physical origami—at least not yet.
+          {uiStrings.startScreenDescription}
         </p>
         <p className="text-sm text-gray-500 mt-2">
-          By using this application, you agree not to create harmful, explicit or unlawful content.
+          {uiStrings.startScreenTerms}
           {' '}
-          <a href="#/" className="underline text-purple-400 hover:text-purple-300">
-            Term and condition
-          </a>
+          <span className="text-purple-400">
+            {uiStrings.startScreenCredit}
+          </span>
         </p>
 
         <div className="mt-8 w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -243,9 +252,9 @@ const StartScreen: React.FC<StartScreenProps> = ({ onFileSelect, onTextGenerate,
               <div className="w-16 h-16 bg-purple-900/50 rounded-full flex items-center justify-center mb-2">
                 <MagicWandIcon className="w-8 h-8 text-purple-400" />
               </div>
-              <h2 className="text-3xl font-bold text-white">Text/Prompt to Image</h2>
-              <p className="text-gray-400">Let your imagination take flight and describe the origami you envision.</p>
-              <p className="text-sm text-gray-500 mt-1">The suggestions below are based on my experience with adjusting prompt weights to make AI more controllable, rather than on any formal categorization or classification of origami.</p>
+              <h2 className="text-3xl font-bold text-white">{uiStrings.textToImageTitle}</h2>
+              <p className="text-gray-400">{uiStrings.textToImageDescription}</p>
+              <p className="text-sm text-gray-500 mt-1">{uiStrings.textToImageDisclaimer}</p>
               <form onSubmit={(e) => { e.preventDefault(); handleGenerateClick(); }} className="w-full flex flex-col sm:flex-row items-center gap-2 mt-4">
                   <input
                       type="text"
@@ -258,7 +267,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onFileSelect, onTextGenerate,
                       className="w-full sm:w-auto bg-gradient-to-br from-purple-600 to-pink-500 text-white font-bold py-4 px-8 text-lg rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner disabled:from-purple-800 disabled:to-pink-700 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none"
                       disabled={!prompt.trim()}
                   >
-                      Generate
+                      {uiStrings.generate}
                   </button>
               </form>
 
@@ -272,7 +281,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onFileSelect, onTextGenerate,
                     return (
                     <div key={category.name}>
                     <h3 className="text-md font-semibold text-gray-300">
-                        {category.name} <span className="text-gray-500 font-normal text-sm">(select {category.limit === 1 ? '1' : `up to ${category.limit}`})</span>
+                        {uiStrings[category.nameKey]} <span className="text-gray-500 font-normal text-sm">{category.limit === 1 ? uiStrings.selectOne : uiStrings.selectUpTo.replace('{limit}', String(category.limit))}</span>
                     </h3>
                     <div className="flex flex-wrap gap-2 mt-2 items-center">
                         {wordsToShow.map(word => {
@@ -308,7 +317,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onFileSelect, onTextGenerate,
             <div className="w-full mt-6 space-y-2 text-left self-start">
                 <div className="flex justify-between items-center">
                     <h3 className="text-md font-semibold text-gray-300">
-                        History
+                        {uiStrings.history}
                     </h3>
                     {promptHistory.length > 0 && (
                         <button
@@ -316,7 +325,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onFileSelect, onTextGenerate,
                             className="text-xs font-semibold text-gray-500 hover:text-red-400 transition-colors"
                             aria-label="Clear prompt history"
                         >
-                            CLEAR
+                            {uiStrings.clearHistory}
                         </button>
                     )}
                 </div>
@@ -334,7 +343,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onFileSelect, onTextGenerate,
                         ))}
                     </div>
                 ) : (
-                    <p className="text-sm text-gray-500 italic">Your recent prompts will appear here.</p>
+                    <p className="text-sm text-gray-500 italic">{uiStrings.historyPlaceholder}</p>
                 )}
             </div>
           </div>
@@ -353,24 +362,24 @@ const StartScreen: React.FC<StartScreenProps> = ({ onFileSelect, onTextGenerate,
               <div className="w-16 h-16 bg-purple-900/50 rounded-full flex items-center justify-center mb-2">
                 <UploadIcon className="w-8 h-8 text-purple-400" />
               </div>
-              <h2 className="text-3xl font-bold text-white">Image to Image</h2>
-              <p className="text-gray-400">Upload one origami image for the full suite of AI editing tools.</p>
-               <label htmlFor="image-upload-start" className="mt-4 relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-white/10 border border-white/20 rounded-full cursor-pointer group hover:bg-white/20 transition-colors">
-                  Upload an Image
+              <h2 className="text-3xl font-bold text-white">{uiStrings.imageToImageTitle}</h2>
+              <p className="text-gray-400">{uiStrings.imageToImageDescription}</p>
+               <label htmlFor="image-upload-start" className="mt-4 relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-gradient-to-br from-purple-600 to-pink-500 rounded-lg cursor-pointer transition-all duration-300 ease-in-out shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner">
+                  {uiStrings.uploadAnImage}
               </label>
               <input id="image-upload-start" type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
-              <p className="text-sm text-gray-500">or drag and drop</p>
+              <p className="text-sm text-gray-500">{uiStrings.dragAndDrop}</p>
           </div>
           
           {/* Batch Edit Photos */}
           <div className="bg-black/20 border border-purple-800/50 rounded-xl p-8 flex flex-col items-center justify-center gap-4">
               <div className="w-16 h-16 bg-purple-900/50 rounded-full flex items-center justify-center mb-2">
-                <RectangleStackIcon className="w-8 h-8 text-purple-400" />
+                <LayersIcon className="w-8 h-8 text-purple-400" />
               </div>
-              <h2 className="text-3xl font-bold text-white">Batch Edit</h2>
-              <p className="text-gray-400">...multiple origami images at once.</p>
-              <button onClick={onBatchEditClick} className="mt-4 relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-white/10 border border-white/20 rounded-full cursor-pointer group hover:bg-white/20 transition-colors">
-                  Select Photos
+              <h2 className="text-3xl font-bold text-white">{uiStrings.batchEditTitle}</h2>
+              <p className="text-gray-400">{uiStrings.batchEditDescription}</p>
+              <button onClick={onBatchEditClick} className="mt-4 relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-gradient-to-br from-purple-600 to-pink-500 rounded-lg cursor-pointer transition-all duration-300 ease-in-out shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner">
+                  {uiStrings.batchEditSelectPhotos}
               </button>
           </div>
         </div>
