@@ -15,9 +15,9 @@ interface SuggestionsPanelProps {
 
 const SuggestionsPanel: React.FC<SuggestionsPanelProps> = ({ suggestions, onApplySuggestion, isLoading }) => {
   return (
-    <div className="w-full bg-gray-800/50 border border-gray-700 rounded-lg p-6 flex flex-col items-center gap-4 animate-fade-in backdrop-blur-sm text-center">
-      <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mb-2">
-        <LightBulbIcon className="w-9 h-9 text-blue-400" />
+    <div className="w-full bg-black/30 border border-purple-800/50 rounded-lg p-6 flex flex-col items-center gap-4 animate-fade-in backdrop-blur-sm text-center">
+      <div className="w-16 h-16 bg-purple-900/50 rounded-full flex items-center justify-center mb-2">
+        <LightBulbIcon className="w-9 h-9 text-purple-400" />
       </div>
       <h3 className="text-xl font-bold text-gray-200">AI Suggestions</h3>
 

@@ -427,7 +427,7 @@ const App: React.FC = () => {
 
     return (
       <div className="w-full max-w-7xl mx-auto flex flex-col items-center gap-6 animate-fade-in">
-        <div className="relative w-full shadow-2xl rounded-xl overflow-hidden bg-black/20 checkerboard-bg">
+        <div className="relative w-full shadow-2xl rounded-xl overflow-hidden bg-black/40 checkerboard-bg">
             {isLoading && (
                 <div className="absolute inset-0 bg-black/70 z-30 flex flex-col items-center justify-center gap-4 animate-fade-in">
                     <Spinner />
@@ -446,15 +446,15 @@ const App: React.FC = () => {
             )}
 
             {displayHotspot && !isLoading && activeTab === 'magic-edit' && (
-                <div className="absolute rounded-full w-6 h-6 bg-blue-500/50 border-2 border-white pointer-events-none -translate-x-1/2 -translate-y-1/2 z-20" style={{ left: `${displayHotspot.x}px`, top: `${displayHotspot.y}px` }} >
-                    <div className="absolute inset-0 rounded-full w-6 h-6 animate-ping bg-blue-400"></div>
+                <div className="absolute rounded-full w-6 h-6 bg-purple-500/50 border-2 border-white pointer-events-none -translate-x-1/2 -translate-y-1/2 z-20" style={{ left: `${displayHotspot.x}px`, top: `${displayHotspot.y}px` }} >
+                    <div className="absolute inset-0 rounded-full w-6 h-6 animate-ping bg-purple-400"></div>
                 </div>
             )}
         </div>
         
-        <div className="w-full bg-gray-800/80 border border-gray-700/80 rounded-lg p-2 flex items-center justify-center gap-1 flex-wrap backdrop-blur-sm">
+        <div className="w-full bg-black/30 border border-purple-800/50 rounded-lg p-2 flex items-center justify-center gap-1 flex-wrap backdrop-blur-sm">
             {TABS.map(tab => (
-                 <button key={tab} onClick={() => setActiveTab(tab)} className={`flex-grow capitalize font-semibold py-3 px-4 rounded-md transition-all duration-200 text-sm md:text-base ${ activeTab === tab ? 'bg-gradient-to-br from-blue-500 to-cyan-400 text-white shadow-lg shadow-cyan-500/40' : 'text-gray-300 hover:text-white hover:bg-white/10'}`}>
+                 <button key={tab} onClick={() => setActiveTab(tab)} className={`flex-grow capitalize font-semibold py-3 px-4 rounded-md transition-all duration-200 text-sm md:text-base ${ activeTab === tab ? 'bg-gradient-to-br from-purple-600 to-pink-500 text-white shadow-lg shadow-pink-500/40' : 'text-gray-300 hover:text-white hover:bg-white/10'}`}>
                     {tab.replace('-', ' ')}
                 </button>
             ))}
@@ -466,8 +466,8 @@ const App: React.FC = () => {
                 <div className="flex flex-col items-center gap-4">
                     <p className="text-md text-gray-400">{editHotspot ? 'Great! Now describe your localized edit below.' : 'Click an area on the image to make a precise edit.'}</p>
                     <form onSubmit={(e) => { e.preventDefault(); handleGenerate(); }} className="w-full flex items-center gap-2">
-                        <input type="text" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder={editHotspot ? "e.g., 'change my shirt color to blue'" : "First click a point on the image"} className="flex-grow bg-gray-800 border border-gray-700 text-gray-200 rounded-lg p-5 text-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition w-full disabled:cursor-not-allowed disabled:opacity-60" disabled={isLoading || !editHotspot} />
-                        <button type="submit" className="bg-gradient-to-br from-blue-600 to-blue-500 text-white font-bold py-5 px-8 text-lg rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner disabled:from-blue-800 disabled:to-blue-700 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none" disabled={isLoading || !prompt.trim() || !editHotspot}>Generate</button>
+                        <input type="text" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder={editHotspot ? "e.g., 'change my shirt color to blue'" : "First click a point on the image"} className="flex-grow bg-purple-950/20 border border-purple-800/60 text-gray-200 rounded-lg p-5 text-lg focus:ring-2 focus:ring-purple-500 focus:outline-none transition w-full disabled:cursor-not-allowed disabled:opacity-60" disabled={isLoading || !editHotspot} />
+                        <button type="submit" className="bg-gradient-to-br from-purple-600 to-pink-500 text-white font-bold py-5 px-8 text-lg rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner disabled:from-purple-800 disabled:to-pink-700 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none" disabled={isLoading || !prompt.trim() || !editHotspot}>Generate</button>
                     </form>
                 </div>
             )}

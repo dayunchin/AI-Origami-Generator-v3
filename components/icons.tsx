@@ -29,9 +29,39 @@ export const SparkleIcon: React.FC<{ className?: string }> = ({ className }) => 
   </svg>
 );
 
+export const OrigamiIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21 3 10l9-9 9 9-9 11zm0 0L3 10m9 11 9-11M3 10l6 4 6-4" />
+    </svg>
+);
+
+export const DreamIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 12h1m8-9v1m8 8h1m-9 8v1M5.6 5.6l.7.7m12.1-.7l-.7.7m0 11.4l.7.7m-12.1-.7l-.7.7" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 16a5 5 0 1 1 6 0a3.5 3.5 0 0 0-1 3a2 2 0 0 1-4 0a3.5 3.5 0 0 0-1-3" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9.7 17h4.6" />
+    </svg>
+);
+
+export const WingedDreamIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12.55,16.89A5.4,5.4,0,0,1,8,20a5.39,5.39,0,0,1-4.14-2,4.81,4.81,0,0,1-1-3.44,5.13,5.13,0,0,1,4.47-5.1,5.5,5.5,0,0,1,10.6,2.15" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M11.53,8.58a3.72,3.72,0,0,0-1-2.45,3.81,3.81,0,0,0-5.32,0,3.72,3.72,0,0,0-1,2.45" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M22,10.15a3.72,3.72,0,0,0-1-2.45,3.81,3.81,0,0,0-5.32,0,3.72,3.72,0,0,0-1,2.45" />
+    </svg>
+);
+
 export const MagicWandIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.475 2.118A2.25 2.25 0 0 1 .879 16.5a3 3 0 0 1 4.242-4.242 3 3 0 0 0 4.242 0 3 3 0 0 0 0-4.242 3 3 0 0 1-4.242-4.242 3 3 0 0 1 4.242 0 3 3 0 0 1 0 4.242 3 3 0 0 0 4.242 4.242 3 3 0 0 0 5.78-1.128 2.25 2.25 0 0 1 2.475-2.118 2.25 2.25 0 0 1 .879 3.5a3 3 0 0 1-4.242 4.242 3 3 0 0 0-4.242 0 3 3 0 0 0 0 4.242Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12.86,3.34,14.21,6,17,7.35,14.21,8.69,12.86,11.34,11.52,8.69,8.69,7.35l2.83-1.34Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="m15.54,15.54,5.09,5.09" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5,4.5l1,1" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4,12H6" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5,19.5l1-1" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12,20V18" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5,19.5l-1-1" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M20,12H18" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5,4.5l-1,1" />
     </svg>
 );
 
@@ -96,7 +126,7 @@ export const PaintBrushIcon: React.FC<{ className?: string }> = ({ className }) 
 
 export const BookmarkIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c.764.425 1.21 1.243 1.21 2.12v13.278c0 .877-.446 1.695-1.21 2.122-1.078.602-2.343.602-3.421 0l-4.364-2.427-4.364 2.427c-1.078.602-2.343.602-3.421 0-.764-.425-1.21-1.243-1.21-2.12V5.442c0-.877.446-1.695 1.21-2.122 1.078-.602 2.343-.602 3.421 0l4.364 2.427 4.364-2.427c1.078-.602 2.343-.602 3.421 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c.764.425 1.21 1.243 1.21 2.12v13.278c0 .877-.446 1.695-1.21 2.122-1.078.602-2.343.602-3.421 0l-4.364-2.427-4.364 2.427c-1.078.602-2.343.602-3.421 0-.764-.425-1.21-1.243-1.21-2.12V5.442c0-.877.446-1.695 1.21-2.122 1.078-.602 2.343.602 3.421 0l4.364 2.427 4.364-2.427c1.078-.602 2.343.602 3.421 0z" />
     </svg>
 );
 

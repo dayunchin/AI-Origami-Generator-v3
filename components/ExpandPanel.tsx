@@ -29,9 +29,9 @@ const ExpandPanel: React.FC<ExpandPanelProps> = ({ onExpand, isLoading }) => {
   };
 
   return (
-    <div className="w-full bg-gray-800/50 border border-gray-700 rounded-lg p-6 flex flex-col items-center gap-4 animate-fade-in backdrop-blur-sm">
-      <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mb-2">
-        <ArrowsPointingOutIcon className="w-9 h-9 text-blue-400" />
+    <div className="w-full bg-black/30 border border-purple-800/50 rounded-lg p-6 flex flex-col items-center gap-4 animate-fade-in backdrop-blur-sm">
+      <div className="w-16 h-16 bg-purple-900/50 rounded-full flex items-center justify-center mb-2">
+        <ArrowsPointingOutIcon className="w-9 h-9 text-purple-400" />
       </div>
       <h3 className="text-xl font-bold text-gray-200">Generative Expand</h3>
       <p className="text-md text-gray-400 max-w-xl text-center">
@@ -46,7 +46,7 @@ const ExpandPanel: React.FC<ExpandPanelProps> = ({ onExpand, isLoading }) => {
             value={direction}
             onChange={(e) => setDirection(e.target.value as ExpandParams['direction'])}
             disabled={isLoading}
-            className="w-full bg-gray-900 border border-gray-600 text-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+            className="w-full bg-purple-950/20 border border-purple-800/60 text-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none transition"
           >
             <option value="all">All Sides</option>
             <option value="horizontal">Horizontal</option>
@@ -68,7 +68,7 @@ const ExpandPanel: React.FC<ExpandPanelProps> = ({ onExpand, isLoading }) => {
             min="64"
             max="1024"
             disabled={isLoading}
-            className="w-full bg-gray-900 border border-gray-600 text-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+            className="w-full bg-purple-950/20 border border-purple-800/60 text-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none transition"
           />
         </div>
       </div>
@@ -81,7 +81,7 @@ const ExpandPanel: React.FC<ExpandPanelProps> = ({ onExpand, isLoading }) => {
             value={expandPrompt}
             onChange={(e) => setExpandPrompt(e.target.value)}
             placeholder="e.g., 'a sandy beach and ocean waves'"
-            className="w-full bg-gray-900 border border-gray-600 text-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+            className="w-full bg-purple-950/20 border border-purple-800/60 text-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none transition"
             disabled={isLoading}
           />
       </div>
@@ -89,7 +89,7 @@ const ExpandPanel: React.FC<ExpandPanelProps> = ({ onExpand, isLoading }) => {
       <button
         onClick={handleExpand}
         disabled={isLoading || pixels <= 0}
-        className="w-full max-w-sm mt-6 bg-gradient-to-br from-blue-600 to-blue-500 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner text-lg disabled:from-blue-800 disabled:to-blue-700 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none"
+        className="w-full max-w-sm mt-6 bg-gradient-to-br from-purple-600 to-pink-500 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner text-lg disabled:from-purple-800 disabled:to-pink-700 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none"
       >
         Generate Expansion
       </button>

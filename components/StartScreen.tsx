@@ -4,7 +4,7 @@
 */
 
 import React, { useState, useEffect } from 'react';
-import { UploadIcon, SparkleIcon, RectangleStackIcon } from './icons';
+import { UploadIcon, MagicWandIcon, RectangleStackIcon } from './icons';
 
 interface StartScreenProps {
   onFileSelect: (files: FileList | null) => void;
@@ -103,9 +103,54 @@ const StartScreen: React.FC<StartScreenProps> = ({ onFileSelect, onTextGenerate,
   const [prompt, setPrompt] = useState('Origami,');
   const [selectedWords, setSelectedWords] = useState<Record<string, string[]>>({});
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
+  const [promptHistory, setPromptHistory] = useState<string[]>([]);
 
-  const toggleCategoryExpansion = (categoryName: string) => {
-    setExpandedCategories(prev => ({ ...prev, [categoryName]: !prev[categoryName] }));
+  // Load prompt history from local storage on mount
+  useEffect(() => {
+    try {
+        const savedHistory = localStorage.getItem('ai_dream_studio_prompt_history');
+        if (savedHistory) {
+            setPromptHistory(JSON.parse(savedHistory));
+        }
+    } catch (error) {
+        console.error("Failed to load prompt history:", error);
+    }
+  }, []);
+
+  const savePromptToHistory = (newPrompt: string) => {
+    const trimmedPrompt = newPrompt.trim();
+    if (!trimmedPrompt || trimmedPrompt === 'Origami,') return;
+
+    // Read from storage to ensure we have the latest history,
+    // avoiding potential stale state issues from the component lifecycle.
+    let currentHistory: string[] = [];
+    try {
+        const savedHistory = localStorage.getItem('ai_dream_studio_prompt_history');
+        if (savedHistory) {
+            currentHistory = JSON.parse(savedHistory);
+        }
+    } catch (error) {
+        console.error("Failed to parse history from localStorage during save", error);
+    }
+
+    const updatedHistory = [trimmedPrompt, ...currentHistory.filter(p => p !== trimmedPrompt)].slice(0, 20); // Keep latest 20
+    
+    try {
+        localStorage.setItem('ai_dream_studio_prompt_history', JSON.stringify(updatedHistory));
+        // Also update the component's state so the UI reflects the change if it doesn't unmount.
+        setPromptHistory(updatedHistory);
+    } catch (error) {
+        console.error("Failed to save prompt history:", error);
+    }
+  };
+
+  const handleClearHistory = () => {
+    setPromptHistory([]);
+    try {
+        localStorage.removeItem('ai_dream_studio_prompt_history');
+    } catch (error) {
+        console.error("Failed to clear prompt history:", error);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -114,79 +159,103 @@ const StartScreen: React.FC<StartScreenProps> = ({ onFileSelect, onTextGenerate,
   
   const handleGenerateClick = () => {
     if (prompt.trim()) {
+      savePromptToHistory(prompt);
       onTextGenerate(prompt);
     }
+  };
+
+  const buildPromptFromWords = (words: Record<string, string[]>) => {
+    const promptParts: string[] = [];
+    promptCategories.forEach(category => {
+        const categoryWords = words[category.name];
+        if (categoryWords && categoryWords.length > 0) {
+            promptParts.push(...categoryWords);
+        }
+    });
+    const basePrompt = "Origami";
+    return [basePrompt, ...promptParts].join(', ');
   };
 
   const handleWordClick = (categoryName: string, word: string) => {
     const category = promptCategories.find(c => c.name === categoryName);
     if (!category) return;
 
-    setSelectedWords(prev => {
-        const newSelected = { ...prev };
-        const currentSelection = newSelected[categoryName] || [];
-
-        if (currentSelection.includes(word)) {
-            // Deselect
-            newSelected[categoryName] = currentSelection.filter(w => w !== word);
+    const currentSelection = selectedWords[categoryName] || [];
+    let newSelectionForCategory: string[];
+    
+    if (currentSelection.includes(word)) {
+        newSelectionForCategory = currentSelection.filter(w => w !== word);
+    } else {
+        if (category.limit === 1) {
+            newSelectionForCategory = [word];
+        } else if (currentSelection.length < category.limit) {
+            newSelectionForCategory = [...currentSelection, word];
         } else {
-            // Select
-            if (category.limit === 1) {
-                newSelected[categoryName] = [word];
-            } else if (currentSelection.length < category.limit) {
-                newSelected[categoryName] = [...currentSelection, word];
-            }
+            return; // Limit reached, do nothing
         }
-        return newSelected;
-    });
+    }
+    
+    const newSelectedWords = { ...selectedWords, [categoryName]: newSelectionForCategory };
+    setSelectedWords(newSelectedWords);
+    setPrompt(buildPromptFromWords(newSelectedWords));
+  };
+  
+  const handleManualPromptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPrompt(e.target.value);
+    // If user types, deselect all word buttons
+    if (Object.keys(selectedWords).length > 0) {
+      setSelectedWords({});
+    }
   };
 
-  useEffect(() => {
-    const promptParts: string[] = [];
-    promptCategories.forEach(category => {
-        const words = selectedWords[category.name];
-        if (words && words.length > 0) {
-            promptParts.push(...words);
-        }
-    });
-    const basePrompt = "Origami";
-    const newPrompt = [basePrompt, ...promptParts].join(', ');
-    setPrompt(newPrompt);
-  }, [selectedWords]);
+  const handleHistoryClick = (historicalPrompt: string) => {
+    setPrompt(historicalPrompt);
+    if (Object.keys(selectedWords).length > 0) {
+      setSelectedWords({});
+    }
+  };
 
+  const toggleCategoryExpansion = (categoryName: string) => {
+    setExpandedCategories(prev => ({ ...prev, [categoryName]: !prev[categoryName] }));
+  };
 
   return (
     <div className="w-full max-w-7xl mx-auto text-center p-4 md:p-8 animate-fade-in">
       <div className="flex flex-col items-center gap-6">
         <h1 className="text-4xl font-extrabold tracking-tight text-gray-100 sm:text-5xl md:text-6xl">
-          AI Origami Generator
+          AI Origami Generator v3
         </h1>
         <p className="max-w-3xl text-lg text-gray-400 md:text-xl">
-          Describe the origami in your mind, release your creative winds, and let AI help bring it to life.
+          This AI tool is for designing digital origami. It does not provide folding instructions, diagrams, or crease patterns for creating physical origami—at least not yet.
         </p>
         <p className="text-sm text-gray-500 mt-2">
           By using this application, you agree not to create harmful, explicit or unlawful content.
+          {' '}
+          <a href="#/" className="underline text-purple-400 hover:text-purple-300">
+            Term and condition
+          </a>
         </p>
 
-        <div className="mt-8 w-full grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="mt-8 w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
           
           {/* Create Image from Text */}
-          <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-8 flex flex-col items-center justify-start gap-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-full flex items-center justify-center mb-2 shadow-lg shadow-cyan-500/30">
-                <SparkleIcon className="w-8 h-8 text-white" />
+          <div className="lg:col-span-2 bg-black/30 border border-purple-800/50 rounded-xl p-8 flex flex-col items-center justify-start gap-4">
+              <div className="w-16 h-16 bg-purple-900/50 rounded-full flex items-center justify-center mb-2">
+                <MagicWandIcon className="w-8 h-8 text-purple-400" />
               </div>
-              <h2 className="text-3xl font-bold text-white">Create with AI</h2>
-              <p className="text-gray-400">Describe anything you can imagine.</p>
+              <h2 className="text-3xl font-bold text-white">Text/Prompt to Image</h2>
+              <p className="text-gray-400">Let your imagination take flight and describe the origami you envision.</p>
+              <p className="text-sm text-gray-500 mt-1">The suggestions below are based on my experience with adjusting prompt weights to make AI more controllable, rather than on any formal categorization or classification of origami.</p>
               <form onSubmit={(e) => { e.preventDefault(); handleGenerateClick(); }} className="w-full flex flex-col sm:flex-row items-center gap-2 mt-4">
                   <input
                       type="text"
                       value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
-                      className="flex-grow bg-gray-900/80 border border-gray-600 text-gray-200 rounded-lg p-4 text-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition w-full"
+                      onChange={handleManualPromptChange}
+                      className="flex-grow bg-purple-950/20 border border-purple-800/60 text-gray-200 rounded-lg p-4 text-lg focus:ring-2 focus:ring-purple-500 focus:outline-none transition w-full"
                   />
                   <button 
                       type="submit"
-                      className="w-full sm:w-auto bg-gradient-to-br from-blue-600 to-blue-500 text-white font-bold py-4 px-8 text-lg rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner disabled:from-blue-800 disabled:to-blue-700 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none"
+                      className="w-full sm:w-auto bg-gradient-to-br from-purple-600 to-pink-500 text-white font-bold py-4 px-8 text-lg rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner disabled:from-purple-800 disabled:to-pink-700 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none"
                       disabled={!prompt.trim()}
                   >
                       Generate
@@ -214,7 +283,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onFileSelect, onTextGenerate,
                             onClick={() => handleWordClick(category.name, word)}
                             className={`px-3 py-1.5 text-sm rounded-lg transition-all duration-200 ${
                                 isSelected 
-                                ? 'bg-blue-500 text-white font-semibold ring-2 ring-offset-2 ring-offset-gray-800 ring-blue-500 shadow-lg shadow-blue-500/30' 
+                                ? 'bg-purple-600 text-white font-semibold ring-2 ring-offset-2 ring-offset-black ring-purple-500 shadow-lg shadow-purple-500/30' 
                                 : 'bg-gray-700/80 hover:bg-gray-600/80 text-gray-300'
                             }`}
                             >
@@ -236,11 +305,43 @@ const StartScreen: React.FC<StartScreenProps> = ({ onFileSelect, onTextGenerate,
                 )})}
             </div>
 
+            <div className="w-full mt-6 space-y-2 text-left self-start">
+                <div className="flex justify-between items-center">
+                    <h3 className="text-md font-semibold text-gray-300">
+                        History
+                    </h3>
+                    {promptHistory.length > 0 && (
+                        <button
+                            onClick={handleClearHistory}
+                            className="text-xs font-semibold text-gray-500 hover:text-red-400 transition-colors"
+                            aria-label="Clear prompt history"
+                        >
+                            CLEAR
+                        </button>
+                    )}
+                </div>
+                {promptHistory.length > 0 ? (
+                    <div className="flex flex-wrap gap-2 items-center">
+                        {promptHistory.map((p, index) => (
+                            <button
+                                key={index}
+                                onClick={() => handleHistoryClick(p)}
+                                className="px-3 py-1.5 text-sm rounded-lg transition-all duration-200 bg-gray-700/80 hover:bg-gray-600/80 text-gray-300 max-w-full"
+                                title={p}
+                            >
+                               <span className="truncate block max-w-[250px]">{p}</span>
+                            </button>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-sm text-gray-500 italic">Your recent prompts will appear here.</p>
+                )}
+            </div>
           </div>
           
           {/* Edit a Photo */}
           <div 
-            className={`bg-gray-800/30 border-2 rounded-xl p-8 flex flex-col items-center justify-center gap-4 transition-all duration-300 ${isDraggingOver ? 'bg-blue-500/10 border-dashed border-blue-400' : 'border-gray-700/80'}`}
+            className={`bg-black/20 border-2 rounded-xl p-8 flex flex-col items-center justify-center gap-4 transition-all duration-300 ${isDraggingOver ? 'bg-purple-500/10 border-dashed border-purple-400' : 'border-purple-800/50'}`}
             onDragOver={(e) => { e.preventDefault(); setIsDraggingOver(true); }}
             onDragLeave={() => setIsDraggingOver(false)}
             onDrop={(e) => {
@@ -249,11 +350,11 @@ const StartScreen: React.FC<StartScreenProps> = ({ onFileSelect, onTextGenerate,
               onFileSelect(e.dataTransfer.files);
             }}
           >
-              <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mb-2">
-                <UploadIcon className="w-8 h-8 text-blue-400" />
+              <div className="w-16 h-16 bg-purple-900/50 rounded-full flex items-center justify-center mb-2">
+                <UploadIcon className="w-8 h-8 text-purple-400" />
               </div>
-              <h2 className="text-3xl font-bold text-white">Edit a Photo</h2>
-              <p className="text-gray-400">Upload one image for the full suite of AI editing tools.</p>
+              <h2 className="text-3xl font-bold text-white">Image to Image</h2>
+              <p className="text-gray-400">Upload one origami image for the full suite of AI editing tools.</p>
                <label htmlFor="image-upload-start" className="mt-4 relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-white/10 border border-white/20 rounded-full cursor-pointer group hover:bg-white/20 transition-colors">
                   Upload an Image
               </label>
@@ -262,12 +363,12 @@ const StartScreen: React.FC<StartScreenProps> = ({ onFileSelect, onTextGenerate,
           </div>
           
           {/* Batch Edit Photos */}
-          <div className="bg-gray-800/30 border border-gray-700/80 rounded-xl p-8 flex flex-col items-center justify-center gap-4">
-              <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mb-2">
-                <RectangleStackIcon className="w-8 h-8 text-blue-400" />
+          <div className="bg-black/20 border border-purple-800/50 rounded-xl p-8 flex flex-col items-center justify-center gap-4">
+              <div className="w-16 h-16 bg-purple-900/50 rounded-full flex items-center justify-center mb-2">
+                <RectangleStackIcon className="w-8 h-8 text-purple-400" />
               </div>
               <h2 className="text-3xl font-bold text-white">Batch Edit</h2>
-              <p className="text-gray-400">Apply one filter or adjustment to multiple images at once.</p>
+              <p className="text-gray-400">...multiple origami images at once.</p>
               <button onClick={onBatchEditClick} className="mt-4 relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-white/10 border border-white/20 rounded-full cursor-pointer group hover:bg-white/20 transition-colors">
                   Select Photos
               </button>

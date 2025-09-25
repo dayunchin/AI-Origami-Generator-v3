@@ -156,20 +156,20 @@ const BatchEditor: React.FC<BatchEditorProps> = ({ onExit }) => {
                 <p className="text-gray-400 mt-2">Apply one action to many images at once.</p>
             </div>
 
-            <div className="w-full bg-gray-800/80 border border-gray-700/80 rounded-lg p-4 flex flex-col md:flex-row items-center justify-between gap-4 backdrop-blur-sm">
+            <div className="w-full bg-black/30 border border-purple-800/50 rounded-lg p-4 flex flex-col md:flex-row items-center justify-between gap-4 backdrop-blur-sm">
                 <div className="flex flex-col w-full md:w-auto">
                     <label htmlFor="action-select" className="text-sm font-medium text-gray-300 mb-1">Select Action</label>
-                    <select id="action-select" value={selectedAction.name} onChange={e => setSelectedAction(ACTIONS.find(a => a.name === e.target.value)!)} disabled={isProcessing} className="w-full bg-gray-900 border border-gray-600 text-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                        {ACTIONS.map(action => <option key={action.name} value={action.name}>{action.name}</option>)}
+                    <select id="action-select" value={selectedAction.name} onChange={e => setSelectedAction(ACTIONS.find(a => a.name === e.target.value)!)} disabled={isProcessing} className="w-full bg-purple-950/20 border border-purple-800/60 text-gray-200 rounded-lg p-3 focus:ring-2 focus:ring-purple-500 focus:outline-none transition">
+                        {ACTIONS.map(action => <option key={action.name} value={action.name} className="bg-purple-800 text-gray-200">{action.name}</option>)}
                     </select>
                 </div>
-                <button onClick={processImages} disabled={isProcessing || imageJobs.length === 0} className="w-full md:w-auto bg-gradient-to-br from-blue-600 to-blue-500 text-white font-bold py-3 px-8 text-lg rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-px active:scale-95 disabled:from-gray-600 disabled:shadow-none disabled:cursor-not-allowed">
+                <button onClick={processImages} disabled={isProcessing || imageJobs.length === 0} className="w-full md:w-auto bg-gradient-to-br from-purple-600 to-pink-500 text-white font-bold py-3 px-8 text-lg rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/40 hover:-translate-y-px active:scale-95 disabled:from-gray-600 disabled:shadow-none disabled:cursor-not-allowed">
                     {isProcessing ? 'Processing...' : `Process ${imageJobs.length} Images`}
                 </button>
             </div>
             
             {imageJobs.length === 0 ? (
-                <div className="w-full text-center py-20 bg-gray-800/30 border-2 border-dashed border-gray-600 rounded-xl flex flex-col items-center justify-center gap-4">
+                <div className="w-full text-center py-20 bg-black/20 border-2 border-dashed border-purple-700/60 rounded-xl flex flex-col items-center justify-center gap-4">
                      <UploadIcon className="w-12 h-12 text-gray-500" />
                      <h3 className="text-xl font-semibold">No images selected</h3>
                      <p className="text-gray-400">Click below to add images to the batch.</p>

@@ -33,9 +33,9 @@ const StyleTransferPanel: React.FC<StyleTransferPanelProps> = ({ onStyleTransfer
   };
 
   return (
-    <div className="w-full bg-gray-800/50 border border-gray-700 rounded-lg p-6 flex flex-col items-center gap-4 animate-fade-in backdrop-blur-sm text-center">
-      <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mb-2">
-        <PaintBrushIcon className="w-9 h-9 text-blue-400" />
+    <div className="w-full bg-black/30 border border-purple-800/50 rounded-lg p-6 flex flex-col items-center gap-4 animate-fade-in backdrop-blur-sm text-center">
+      <div className="w-16 h-16 bg-purple-900/50 rounded-full flex items-center justify-center mb-2">
+        <PaintBrushIcon className="w-9 h-9 text-purple-400" />
       </div>
       <h3 className="text-xl font-bold text-gray-200">AI Style Transfer</h3>
       <p className="text-md text-gray-400 max-w-md">
@@ -44,7 +44,7 @@ const StyleTransferPanel: React.FC<StyleTransferPanelProps> = ({ onStyleTransfer
 
       <div className="w-full max-w-sm mt-4 flex flex-col items-center gap-4">
         <label htmlFor="style-image-upload" className="w-full cursor-pointer">
-          <div className="w-full h-40 bg-gray-900/50 border-2 border-dashed border-gray-600 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:bg-gray-900/80 hover:border-blue-500 transition-colors">
+          <div className="w-full h-40 bg-purple-950/20 border-2 border-dashed border-purple-800/60 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:bg-purple-950/40 hover:border-purple-500 transition-colors">
             {styleImageUrl ? (
                 <img src={styleImageUrl} alt="Style preview" className="w-full h-full object-contain p-1" />
             ) : (
@@ -60,7 +60,7 @@ const StyleTransferPanel: React.FC<StyleTransferPanelProps> = ({ onStyleTransfer
         <button
           onClick={onStyleTransfer}
           disabled={isLoading || !styleImage}
-          className="w-full bg-gradient-to-br from-blue-600 to-blue-500 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner text-lg disabled:from-blue-800 disabled:to-blue-700 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none"
+          className="w-full bg-gradient-to-br from-purple-600 to-pink-500 text-white font-bold py-4 px-6 rounded-lg transition-all duration-300 ease-in-out shadow-lg shadow-pink-500/20 hover:shadow-xl hover:shadow-pink-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner text-lg disabled:from-purple-800 disabled:to-pink-700 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none"
         >
           Apply Style
         </button>
