@@ -51,7 +51,7 @@ export const englishStrings = {
   startScreenTitle: "AI Origami Generator v3",
   startScreenDescription: "This AI tool is for designing digital origami. It does not provide folding instructions, diagrams, or crease patterns for creating physical origami—at least not yet.",
   startScreenTerms: "By using this application, you agree not to create harmful, explicit or unlawful content.",
-  startScreenCredit: "Credit to Pixshop.",
+  startScreenCredit: "Credit to Pixshop and Gemini.",
   textToImageTitle: "Text/Prompt to Image",
   textToImageDescription: "Let your imagination take flight and describe the origami you envision.",
   textToImageDisclaimer: "The suggestions below are based on my experience with adjusting prompt weights to make AI more controllable, rather than on any formal categorization or classification of origami.",
