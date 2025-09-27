@@ -6,7 +6,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import ReactCrop, { type Crop, type PixelCrop } from 'react-image-crop';
-import { generateEditedImage, generateFilteredImage, generateAdjustedImage, removeBackgroundImage, generateImageFromText, upscaleImage, expandImage, getEditSuggestions, transferStyle, translateText } from './services/geminiService';
+import { generateEditedImage, generateFilteredImage, generateAdjustedImage, removeBackgroundImage, generateImageFromText, upscaleImage, expandImage, getEditSuggestions, transferStyle, translateText, generateImageVariations, generateAnimatedGif, getPromptFromImage, generateInpaintedImage } from './services/geminiService';
 import Header, { LANGUAGES } from './components/Header';
 import Spinner from './components/Spinner';
 import FilterPanel from './components/FilterPanel';
@@ -15,13 +15,17 @@ import CropPanel from './components/CropPanel';
 import RemoveBgPanel from './components/RemoveBgPanel';
 import UpscalePanel from './components/UpscalePanel';
 import ExpandPanel, { type ExpandParams } from './components/ExpandPanel';
-import { UndoIcon, RedoIcon } from './components/icons';
+import { UndoIcon, RedoIcon, SparkleIcon, FilmIcon, LassoIcon } from './components/icons';
 import StartScreen from './components/StartScreen';
 import ComparisonSlider from './components/ComparisonSlider';
 import SuggestionsPanel from './components/SuggestionsPanel';
 import StyleTransferPanel from './components/StyleTransferPanel';
 import PresetsPanel, { type Preset } from './components/PresetsPanel';
 import BatchEditor from './components/BatchEditor';
+import VariationsModal from './components/VariationsModal';
+import GifModal from './components/GifModal';
+import LassoPanel from './components/LassoPanel';
+import LassoCanvas from './components/LassoCanvas';
 import { englishStrings, type UIStrings } from './i18n';
 
 
@@ -43,11 +47,11 @@ const dataURLtoFile = (dataurl: string, filename: string): File => {
 }
 
 type AppMode = 'start' | 'single-image' | 'batch';
-type Tab = 'suggestions' | 'magic-edit' | 'style-transfer' | 'presets' | 'adjust' | 'filters' | 'remove-bg' | 'crop' | 'expand' | 'upscale';
+type Tab = 'suggestions' | 'magic-edit' | 'lasso-select' | 'style-transfer' | 'presets' | 'adjust' | 'filters' | 'remove-bg' | 'crop' | 'expand' | 'upscale';
 type HistoryItem = { file: File; actionDescription?: string };
 type Suggestion = { name: string; prompt: string; };
 
-const TABS: Tab[] = ['suggestions', 'magic-edit', 'style-transfer', 'presets', 'adjust', 'filters', 'remove-bg', 'crop', 'expand', 'upscale'];
+const TABS: Tab[] = ['suggestions', 'magic-edit', 'lasso-select', 'style-transfer', 'presets', 'adjust', 'filters', 'remove-bg', 'crop', 'expand', 'upscale'];
 
 const App: React.FC = () => {
   const [appMode, setAppMode] = useState<AppMode>('start');
@@ -63,14 +67,21 @@ const App: React.FC = () => {
   
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
-  const [aspect, setAspect] = useState<number | undefined>();
+  const [aspect, setAspect] = useState<number | undefined>(1);
   const imgRef = useRef<HTMLImageElement>(null);
 
   const [editSuggestions, setEditSuggestions] = useState<Suggestion[]>([]);
   const [styleImage, setStyleImage] = useState<File | null>(null);
+  const [maskFile, setMaskFile] = useState<File | null>(null);
 
   const [uiStrings, setUiStrings] = useState<UIStrings>(englishStrings);
   const [currentLanguage, setCurrentLanguage] = useState('en');
+
+  const [originalPrompt, setOriginalPrompt] = useState<string | null>(null);
+  const [variations, setVariations] = useState<string[]>([]);
+  const [showVariationsModal, setShowVariationsModal] = useState<boolean>(false);
+  const [gifUrl, setGifUrl] = useState<string | null>(null);
+  const [showGifModal, setShowGifModal] = useState<boolean>(false);
 
   const currentHistoryItem = history[historyIndex] ?? null;
   const currentImage = currentHistoryItem?.file ?? null;
@@ -99,6 +110,11 @@ const App: React.FC = () => {
     }
   }, [originalImage]);
 
+  useEffect(() => {
+    if (activeTab !== 'lasso-select') {
+        setMaskFile(null);
+    }
+  }, [activeTab]);
 
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
@@ -132,6 +148,9 @@ const App: React.FC = () => {
     setCrop(undefined);
     setCompletedCrop(undefined);
     setAppMode('single-image');
+    setOriginalPrompt(null);
+    setVariations([]);
+    setShowVariationsModal(false);
     handleGetSuggestions(file);
   }, [handleGetSuggestions]);
 
@@ -163,6 +182,9 @@ const App: React.FC = () => {
       const generatedImageUrl = await generateImageFromText(textPrompt);
       const newImageFile = dataURLtoFile(generatedImageUrl, `generated-${Date.now()}.png`);
       handleImageUpload(newImageFile);
+      setOriginalPrompt(textPrompt);
+      setVariations([]);
+      setShowVariationsModal(false);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
       setError(`Failed to generate the image. ${errorMessage}`);
@@ -171,6 +193,70 @@ const App: React.FC = () => {
     }
   }, [handleImageUpload, uiStrings]);
   
+  const handleGenerateVariations = useCallback(async () => {
+    if (!currentImage) return;
+    setIsLoading(true);
+    setError(null);
+    try {
+      let promptForVariations = originalPrompt;
+      if (!promptForVariations) {
+        setLoadingMessage(uiStrings.loadingAnalyzingForVariations);
+        promptForVariations = await getPromptFromImage(currentImage);
+      }
+      setLoadingMessage(uiStrings.loadingVariations);
+      const variationResults = await generateImageVariations(promptForVariations, 4);
+      setVariations(variationResults);
+      setShowVariationsModal(true);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+      setError(`Failed to generate variations. ${errorMessage}`);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [originalPrompt, currentImage, uiStrings]);
+
+  const handleSelectVariation = useCallback((url: string) => {
+    const newImageFile = dataURLtoFile(url, `variation-${Date.now()}.png`);
+    addImageToHistory(newImageFile, 'Selected Variation');
+    setShowVariationsModal(false);
+  }, [addImageToHistory]);
+
+  const handleGenerateGif = useCallback(async () => {
+    if (!currentImage) return;
+
+    const animationPrompt = originalPrompt
+      ? `Create a short, looping animation of this origami: ${originalPrompt}. The animation should be a gentle 360-degree rotation.`
+      : "Create a short, looping animation of the subject in this image. The animation should be a gentle 360-degree rotation.";
+    
+    setIsLoading(true);
+    setError(null);
+    
+    const messages = [
+        uiStrings.loadingGif1,
+        uiStrings.loadingGif2,
+        uiStrings.loadingGif3,
+    ];
+    let messageIndex = 0;
+    setLoadingMessage(messages[messageIndex]);
+    const intervalId = setInterval(() => {
+        messageIndex = (messageIndex + 1) % messages.length;
+        setLoadingMessage(messages[messageIndex]);
+    }, 5000);
+
+    try {
+        const videoUri = await generateAnimatedGif(currentImage, animationPrompt);
+        setGifUrl(videoUri);
+        setShowGifModal(true);
+    } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+        setError(`Failed to generate animation. ${errorMessage}`);
+    } finally {
+        clearInterval(intervalId);
+        setIsLoading(false);
+    }
+  }, [currentImage, originalPrompt, uiStrings]);
+
+
   const handleApplyFilter = useCallback(async (filterPrompt: string) => {
     if (!currentImage) return;
     setIsLoading(true);
@@ -309,6 +395,25 @@ const App: React.FC = () => {
         setIsLoading(false);
     }
   }, [currentImage, styleImage, addImageToHistory, uiStrings]);
+
+  const handleLassoGenerate = useCallback(async (lassoPrompt: string) => {
+    if (!currentImage || !maskFile || !lassoPrompt.trim()) return;
+    setIsLoading(true);
+    setError(null);
+    setLoadingMessage(uiStrings.loadingLassoEdit);
+    try {
+        const resultUrl = await generateInpaintedImage(currentImage, maskFile, lassoPrompt);
+        const newImageFile = dataURLtoFile(resultUrl, `inpainted-${Date.now()}.png`);
+        addImageToHistory(newImageFile, `Lasso Edit: "${lassoPrompt}"`);
+        setMaskFile(null); // Clear mask after use
+    } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+        setError(`Failed to apply lasso edit. ${errorMessage}`);
+    } finally {
+        setIsLoading(false);
+    }
+  }, [currentImage, maskFile, addImageToHistory, uiStrings]);
+
 
   const handleApplyPreset = useCallback(async (preset: Preset) => {
     if (!originalImage) return;
@@ -505,6 +610,7 @@ const App: React.FC = () => {
   const tabNames: Record<Tab, keyof UIStrings> = {
     'suggestions': 'tabSuggestions',
     'magic-edit': 'tabMagicEdit',
+    'lasso-select': 'tabLassoSelect',
     'style-transfer': 'tabStyleTransfer',
     'presets': 'tabPresets',
     'adjust': 'tabAdjust',
@@ -549,7 +655,7 @@ const App: React.FC = () => {
             {isLoading && (
                 <div className="absolute inset-0 bg-black/70 z-30 flex flex-col items-center justify-center gap-4 animate-fade-in">
                     <Spinner />
-                    <p className="text-gray-300">{loadingMessage}</p>
+                    <p className="text-gray-300 text-center">{loadingMessage}</p>
                 </div>
             )}
             
@@ -562,6 +668,10 @@ const App: React.FC = () => {
             ) : (
                 <img ref={imgRef} key={currentImageUrl} src={currentImageUrl} alt="Current" onClick={handleImageClick} className={`w-full h-auto object-contain max-h-[60vh] rounded-xl ${activeTab === 'magic-edit' ? 'cursor-crosshair' : ''}`} />
             )}
+            
+            {activeTab === 'lasso-select' && !isLoading && (
+              <LassoCanvas imageRef={imgRef} onMaskReady={setMaskFile} />
+            )}
 
             {displayHotspot && !isLoading && activeTab === 'magic-edit' && (
                 <div className="absolute rounded-full w-6 h-6 bg-purple-500/50 border-2 border-white pointer-events-none -translate-x-1/2 -translate-y-1/2 z-20" style={{ left: `${displayHotspot.x}px`, top: `${displayHotspot.y}px` }} >
@@ -572,7 +682,7 @@ const App: React.FC = () => {
         
         <div className="w-full bg-black/30 border border-purple-800/50 rounded-lg p-2 flex items-center justify-center gap-1 flex-wrap backdrop-blur-sm">
             {TABS.map(tab => (
-                 <button key={tab} onClick={() => setActiveTab(tab)} className={`flex-grow capitalize font-semibold py-3 px-4 rounded-md transition-all duration-200 text-sm md:text-base ${ activeTab === tab ? 'bg-gradient-to-br from-purple-600 to-pink-500 text-white shadow-lg shadow-pink-500/40' : 'text-gray-300 hover:text-white hover:bg-white/10'}`}>
+                 <button key={tab} onClick={() => setActiveTab(tab)} className={`flex items-center justify-center gap-2 flex-grow capitalize font-semibold py-3 px-4 rounded-md transition-all duration-200 text-sm md:text-base ${ activeTab === tab ? 'bg-gradient-to-br from-purple-600 to-pink-500 text-white shadow-lg shadow-pink-500/40' : 'text-gray-300 hover:text-white hover:bg-white/10'}`}>
                     {uiStrings[tabNames[tab]]}
                 </button>
             ))}
@@ -589,6 +699,7 @@ const App: React.FC = () => {
                     </form>
                 </div>
             )}
+            {activeTab === 'lasso-select' && <LassoPanel onGenerate={handleLassoGenerate} isMaskReady={!!maskFile} isLoading={isLoading} uiStrings={uiStrings} />}
             {activeTab === 'style-transfer' && <StyleTransferPanel onStyleTransfer={handleStyleTransfer} onSetStyleImage={setStyleImage} styleImage={styleImage} isLoading={isLoading} uiStrings={uiStrings} />}
             {activeTab === 'presets' && <PresetsPanel history={history.slice(1, historyIndex + 1)} onApplyPreset={handleApplyPreset} uiStrings={uiStrings} />}
             {activeTab === 'expand' && <ExpandPanel onExpand={handleExpand} isLoading={isLoading} uiStrings={uiStrings} />}
@@ -599,13 +710,37 @@ const App: React.FC = () => {
             {activeTab === 'remove-bg' && <RemoveBgPanel onRemoveBackground={handleRemoveBackground} isLoading={isLoading} uiStrings={uiStrings} />}
         </div>
         
-        <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
-            <button onClick={handleUndo} disabled={!canUndo} className="flex items-center justify-center text-center bg-white/10 border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md transition-all duration-200 ease-in-out hover:bg-white/20 hover:border-white/30 active:scale-95 text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-white/5" aria-label="Undo last action"><UndoIcon className="w-5 h-5 mr-2" />{uiStrings.undo}</button>
-            <button onClick={handleRedo} disabled={!canRedo} className="flex items-center justify-center text-center bg-white/10 border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md transition-all duration-200 ease-in-out hover:bg-white/20 hover:border-white/30 active:scale-95 text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-white/5" aria-label="Redo last action"><RedoIcon className="w-5 h-5 mr-2" />{uiStrings.redo}</button>
-            <div className="h-6 w-px bg-gray-600 mx-1 hidden sm:block"></div>
-            <button onClick={handleReset} disabled={!canUndo} className="text-center bg-transparent border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md transition-all duration-200 ease-in-out hover:bg-white/10 hover:border-white/30 active:scale-95 text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-transparent">{uiStrings.reset}</button>
-            <button onClick={handleExitEditor} className="text-center bg-white/10 border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md transition-all duration-200 ease-in-out hover:bg-white/20 hover:border-white/30 active:scale-95 text-base">{uiStrings.exitEditor}</button>
-            <button onClick={handleDownload} className="flex-grow sm:flex-grow-0 ml-auto bg-gradient-to-br from-green-600 to-green-500 text-white font-bold py-3 px-5 rounded-md transition-all duration-300 ease-in-out shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner text-base">{uiStrings.downloadImage}</button>
+        <div className="w-full flex flex-wrap items-center justify-between gap-4 mt-6">
+            <div className="flex flex-wrap items-center justify-center gap-3">
+                {currentImage && (
+                    <button
+                        onClick={handleGenerateVariations}
+                        disabled={isLoading}
+                        className="flex items-center justify-center text-center bg-white/10 border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md transition-all duration-200 ease-in-out hover:bg-white/20 active:scale-95 text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                        aria-label="Generate Variations"
+                    >
+                        <SparkleIcon className="w-5 h-5 mr-2" />
+                        {uiStrings.generateVariations}
+                    </button>
+                )}
+                <button onClick={handleUndo} disabled={!canUndo || isLoading} className="flex items-center justify-center text-center bg-white/10 border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md transition-all duration-200 ease-in-out hover:bg-white/20 hover:border-white/30 active:scale-95 text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-white/5" aria-label="Undo last action"><UndoIcon className="w-5 h-5 mr-2" />{uiStrings.undo}</button>
+                <button onClick={handleRedo} disabled={!canRedo || isLoading} className="flex items-center justify-center text-center bg-white/10 border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md transition-all duration-200 ease-in-out hover:bg-white/20 hover:border-white/30 active:scale-95 text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-white/5" aria-label="Redo last action"><RedoIcon className="w-5 h-5 mr-2" />{uiStrings.redo}</button>
+                <div className="h-6 w-px bg-gray-600 mx-1 hidden sm:block"></div>
+                <button onClick={handleReset} disabled={!canUndo || isLoading} className="text-center bg-transparent border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md transition-all duration-200 ease-in-out hover:bg-white/10 hover:border-white/30 active:scale-95 text-base disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-transparent">{uiStrings.reset}</button>
+                <button onClick={handleExitEditor} disabled={isLoading} className="text-center bg-white/10 border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md transition-all duration-200 ease-in-out hover:bg-white/20 hover:border-white/30 active:scale-95 text-base">{uiStrings.exitEditor}</button>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+                <button
+                    onClick={handleGenerateGif}
+                    disabled={isLoading}
+                    className="flex items-center justify-center text-center bg-white/10 border border-white/20 text-gray-200 font-semibold py-3 px-5 rounded-md transition-all duration-200 ease-in-out hover:bg-white/20 active:scale-95 text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label="Generate GIF"
+                >
+                    <FilmIcon className="w-5 h-5 mr-2" />
+                    {uiStrings.generateGif}
+                </button>
+                <button onClick={handleDownload} disabled={isLoading} className="bg-gradient-to-br from-green-600 to-green-500 text-white font-bold py-3 px-5 rounded-md transition-all duration-300 ease-in-out shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/40 hover:-translate-y-px active:scale-95 active:shadow-inner text-base disabled:opacity-50 disabled:cursor-not-allowed">{uiStrings.downloadImage}</button>
+            </div>
         </div>
       </div>
     );
@@ -646,6 +781,22 @@ const App: React.FC = () => {
       <main className={`flex-grow w-full max-w-[1600px] mx-auto p-4 md:p-8 flex justify-center ${appMode !== 'start' ? 'items-start' : 'items-center'}`}>
         {renderContent()}
       </main>
+      <VariationsModal
+        isOpen={showVariationsModal}
+        variations={variations}
+        onSelect={handleSelectVariation}
+        onClose={() => setShowVariationsModal(false)}
+        uiStrings={uiStrings}
+      />
+      <GifModal
+        isOpen={showGifModal}
+        videoUrl={gifUrl}
+        onClose={() => {
+            setShowGifModal(false);
+            setGifUrl(null);
+        }}
+        uiStrings={uiStrings}
+      />
     </div>
   );
 };

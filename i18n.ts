@@ -11,6 +11,7 @@ export const englishStrings = {
   // App General
   loadingMagic: "AI is working its magic...",
   loadingLocalizedEdit: "Performing localized edit...",
+  loadingLassoEdit: "Applying edit to selected area...",
   loadingGeneratingImage: "AI is generating your image...",
   loadingFilter: "Applying creative filter...",
   loadingAdjustment: "Applying adjustment...",
@@ -20,12 +21,18 @@ export const englishStrings = {
   loadingStyleTransfer: "Applying artistic style...",
   loadingPreset: "Applying preset... (Step {currentStep}/{totalSteps})",
   loadingTranslating: "Translating to {languageName}...",
+  loadingVariations: "Generating creative variations...",
+  loadingAnalyzingForVariations: "Analyzing image to create variations...",
+  loadingGif1: "Conjuring animation spirits...",
+  loadingGif2: "Rendering the motion...",
+  loadingGif3: "Finalizing the video loop... this can take a minute.",
   errorOccurred: "An Error Occurred",
   errorTryAgain: "Try Again",
   
   // Tabs
   tabSuggestions: "Suggestions",
   tabMagicEdit: "Magic Edit",
+  tabLassoSelect: "Lasso Select",
   tabStyleTransfer: "Style Transfer",
   tabPresets: "Presets",
   tabAdjust: "Adjust",
@@ -41,11 +48,18 @@ export const englishStrings = {
   magicEditPlaceholderReady: "e.g., 'change my shirt color to blue'",
   magicEditPlaceholderClick: "First click a point on the image",
   generate: "Generate",
+  generateVariations: "Generate Variations",
+  generateGif: "Generate GIF",
   undo: "Undo",
   redo: "Redo",
   reset: "Reset",
   exitEditor: "Exit Editor",
   downloadImage: "Download Image",
+  variationsModalTitle: "Choose a Variation",
+  variationsModalDescription: "Click an image to select it for further editing.",
+  gifModalTitle: "Animation Ready",
+  gifModalDescription: "Your animated video is ready. It will loop automatically like a GIF.",
+  downloadVideo: "Download Video",
 
   // Start Screen
   startScreenTitle: "AI Origami Generator v3",
@@ -144,6 +158,12 @@ export const englishStrings = {
   presetsDelete: "Delete",
   presetsNone: "You have no saved presets.",
   
+  // Lasso Select Panel
+  lassoPanelTitle: "Lasso Select Edit",
+  lassoPanelInstructions: "Click points on the image to create a selection. When you're done, describe the edit you want to make inside the selected area.",
+  lassoPanelPrompt: "Your selection is ready! Describe the edit you want to make.",
+  lassoPlaceholder: "e.g., 'make the water crystal clear'",
+
   // Portrait Panel
   portraitPanelTitle: "Smart Portrait Tools",
   portraitPanelDescription: "Apply one-click professional enhancements to your portraits.",

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { UIStrings } from '../i18n';
 
 interface CropPanelProps {
@@ -14,20 +14,24 @@ interface CropPanelProps {
   uiStrings: UIStrings;
 }
 
-type AspectRatio = 'free' | '1:1' | '16:9';
+type AspectRatio = 'square' | '16:9';
 
 const CropPanel: React.FC<CropPanelProps> = ({ onApplyCrop, onSetAspect, isLoading, isCropping, uiStrings }) => {
-  const [activeAspect, setActiveAspect] = useState<AspectRatio>('free');
+  const [activeAspect, setActiveAspect] = useState<AspectRatio>('square');
   
+  // Set default aspect ratio to square when the component is shown
+  useEffect(() => {
+    onSetAspect(1);
+  }, [onSetAspect]);
+
   const handleAspectChange = (aspect: AspectRatio, value: number | undefined) => {
     setActiveAspect(aspect);
     onSetAspect(value);
   }
 
-  const aspects: { name: AspectRatio, value: number | undefined }[] = [
-    { name: 'free', value: undefined },
-    { name: '1:1', value: 1 / 1 },
-    { name: '16:9', value: 16 / 9 },
+  const aspects: { name: string, id: AspectRatio, value: number | undefined }[] = [
+    { name: 'Square', id: 'square', value: 1 / 1 },
+    { name: '16:9', id: '16:9', value: 16 / 9 },
   ];
 
   return (
@@ -37,13 +41,13 @@ const CropPanel: React.FC<CropPanelProps> = ({ onApplyCrop, onSetAspect, isLoadi
       
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium text-gray-400">{uiStrings.aspectRatio}</span>
-        {aspects.map(({ name, value }) => (
+        {aspects.map(({ name, id, value }) => (
           <button
             key={name}
-            onClick={() => handleAspectChange(name, value)}
+            onClick={() => handleAspectChange(id, value)}
             disabled={isLoading}
             className={`px-4 py-2 rounded-md text-base font-semibold transition-all duration-200 active:scale-95 disabled:opacity-50 ${
-              activeAspect === name 
+              activeAspect === id 
               ? 'bg-gradient-to-br from-purple-600 to-pink-500 text-white shadow-md shadow-pink-500/20' 
               : 'bg-white/10 hover:bg-white/20 text-gray-200'
             }`}

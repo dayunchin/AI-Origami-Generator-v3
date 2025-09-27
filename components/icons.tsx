@@ -29,6 +29,25 @@ export const SparkleIcon: React.FC<{ className?: string }> = ({ className }) => 
   </svg>
 );
 
+export const FilmIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z" />
+  </svg>
+);
+
+export const LassoIcon: React.FC<{ className?: string }> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.05 4.95a7.5 7.5 0 1 0 7.5 7.5" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M17.55 12.45a7.51 7.51 0 0 0-7.5-7.5" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.05 4.95 5.25 9.75" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 5.25 4.5-4.5" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 5.25 5.25.75" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 9.75h4.5" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 9.75v-4.5" />
+    </svg>
+);
+
 export const OrigamiIcon: React.FC<{ className?: string }> = ({ className }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 21 3 10l9-9 9 9-9 11zm0 0L3 10m9 11 9-11M3 10l6 4 6-4" />

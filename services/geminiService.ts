@@ -24,6 +24,19 @@ const fileToPart = async (file: File): Promise<{ inlineData: { mimeType: string;
     return { inlineData: { mimeType, data } };
 };
 
+// Helper function to convert a File object to a base64 string
+const fileToBase64 = async (file: File): Promise<string> => {
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = error => reject(error);
+    });
+    const base64Data = dataUrl.split(',')[1];
+    if (!base64Data) throw new Error("Invalid data URL");
+    return base64Data;
+};
+
 const handleApiResponse = (
     response: GenerateContentResponse,
     context: string // e.g., "edit", "filter", "adjustment"
@@ -103,6 +116,46 @@ Output: Return ONLY the final edited image. Do not return text.`;
 
     return handleApiResponse(response, 'edit');
 };
+
+/**
+ * Generates an edited image using generative AI based on a text prompt and a mask image.
+ * @param originalImage The original image file.
+ * @param maskImage The mask image file (white area is editable).
+ * @param userPrompt The text prompt describing the desired edit.
+ * @returns A promise that resolves to the data URL of the edited image.
+ */
+export const generateInpaintedImage = async (
+    originalImage: File,
+    maskImage: File,
+    userPrompt: string
+): Promise<string> => {
+    console.log('Starting generative inpainting with mask.');
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+    
+    const originalImagePart = await fileToPart(originalImage);
+    const maskImagePart = await fileToPart(maskImage);
+    const prompt = `You are an expert photo editor AI. Your task is to perform a natural, localized edit on the provided image based on the user's request and a mask.
+User Request: "${userPrompt}"
+
+Editing Guidelines:
+- You have been given two images: the original and a black-and-white mask.
+- The edit MUST be applied ONLY to the white areas defined by the mask.
+- The black areas of the mask must remain completely unchanged from the original image.
+- The edit must blend seamlessly with the surrounding, unedited area.
+
+Output: Return ONLY the final edited image. Do not return text.`;
+    const textPart = { text: prompt };
+
+    console.log('Sending image, mask, and prompt to the model...');
+    const response: GenerateContentResponse = await ai.models.generateContent({
+        model: 'gemini-2.5-flash-image-preview',
+        contents: { parts: [originalImagePart, maskImagePart, textPart] },
+    });
+    console.log('Received response from model for inpainting.', response);
+
+    return handleApiResponse(response, 'inpainting');
+};
+
 
 /**
  * Generates an image with a filter applied using generative AI.
@@ -232,6 +285,41 @@ export const generateImageFromText = async (
 
   const base64ImageBytes: string = firstImage.image.imageBytes;
   return `data:image/png;base64,${base64ImageBytes}`;
+};
+
+/**
+ * Generates multiple image variations from a single text prompt.
+ * @param textPrompt The text prompt describing the images to generate.
+ * @param numberOfImages The number of variations to generate.
+ * @returns A promise that resolves to an array of data URLs for the generated images.
+ */
+export const generateImageVariations = async (
+  textPrompt: string,
+  numberOfImages: number
+): Promise<string[]> => {
+  console.log(`Starting variation generation for: ${textPrompt}`);
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+
+  const response = await ai.models.generateImages({
+    model: 'imagen-4.0-generate-001',
+    prompt: textPrompt,
+    config: {
+      numberOfImages,
+      outputMimeType: 'image/png',
+    },
+  });
+  console.log(`Received ${response.generatedImages?.length || 0} variations from model.`, response);
+
+  if (!response.generatedImages || response.generatedImages.length === 0) {
+    throw new Error('The AI model did not return any variations. This can happen due to safety filters or an invalid prompt.');
+  }
+
+  return response.generatedImages.map(img => {
+    if (!img.image?.imageBytes) {
+        throw new Error('An image variation was returned with no data.');
+    }
+    return `data:image/png;base64,${img.image.imageBytes}`;
+  });
 };
 
 /**
@@ -403,4 +491,74 @@ Output the translated JSON only, enclosed in a single JSON code block.`;
     console.error("Failed to parse translated JSON:", e, { jsonStr });
     throw new Error(`The AI returned translated text in an invalid format for ${targetLanguage}.`);
   }
+};
+
+/**
+ * Generates an animated video from a base image and a prompt.
+ * @param image The base image for the animation.
+ * @param prompt A prompt describing the desired animation.
+ * @returns A promise that resolves to the URI of the generated video file.
+ */
+export const generateAnimatedGif = async (
+  image: File,
+  prompt: string
+): Promise<string> => {
+  console.log(`Starting animation generation: ${prompt}`);
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+  const base64Data = await fileToBase64(image);
+
+  let operation = await ai.models.generateVideos({
+    model: 'veo-2.0-generate-001',
+    prompt: prompt,
+    image: {
+      imageBytes: base64Data,
+      mimeType: image.type,
+    },
+    config: {
+      numberOfVideos: 1,
+    },
+  });
+
+  console.log('Video generation started. Polling for completion...');
+  // Poll for the result every 10 seconds.
+  while (!operation.done) {
+    await new Promise(resolve => setTimeout(resolve, 10000));
+    operation = await ai.operations.getVideosOperation({ operation: operation });
+    console.log('Polling video generation status...', operation);
+  }
+
+  const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
+  if (!downloadLink) {
+    console.error('Video generation finished but no download link was provided.', operation);
+    throw new Error('The AI model did not return a video. This might be due to safety policies or an issue with the request.');
+  }
+
+  console.log('Video generation complete. URI:', downloadLink);
+  return downloadLink;
+};
+
+/**
+ * Generates a text prompt from an image.
+ * @param image The image to generate a prompt from.
+ * @returns A promise that resolves to a descriptive text prompt.
+ */
+export const getPromptFromImage = async (image: File): Promise<string> => {
+  console.log('Getting prompt from image.');
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+  
+  const imagePart = await fileToPart(image);
+  const prompt = "You are an expert at creating concise, effective prompts for image generation models. Analyze this image and generate a short, descriptive prompt (under 15 words) that would create a similar image. Focus on the main subject, style, and key attributes. Do not describe the composition. Return only the prompt text.";
+  const textPart = { text: prompt };
+
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: { parts: [imagePart, textPart] },
+  });
+  
+  console.log('Received prompt from model.', response);
+  const generatedPrompt = response.text.trim();
+  if (!generatedPrompt) {
+      throw new Error("The AI failed to generate a descriptive prompt for the image.");
+  }
+  return generatedPrompt;
 };
