@@ -18,22 +18,8 @@ Image-to-Image Generation: Create beautiful, high-quality images of origami conc
 
 🛠️ Single-Image Editor- An AI-powered editing suite to edit or enhance origami images. Sometimes AI origami outputs contain more than one design in a single image; making adjustments can ease the process of folding the actual physical origami model.
 
-1/ AI Suggestions: The editor analyzes your uploaded image and provides one-click enhancement suggestions.
-2/ Magic Edit: Perform precise, localized edits. Simply click a point on the image and describe the change (e.g., "change the color to blue").
-3/ Lasso Select: Draw a free-form selection around an area and describe the changes you want to make only within that region.
-4/ Style Transfer: Apply the complete artistic style (colors, textures, mood) of one image onto another.
-5/ Remove Background: Automatically identifies the main subject and removes the background, creating a transparent PNG.
-6/ Generative Expand (Outpainting): Expand the canvas of your image and let AI seamlessly fill in the new areas, with optional text prompts for context.
-7/ AI Upscale: Increase the image resolution by 2x while intelligently enhancing details and sharpness.
-8/ Presets: Save a sequence of edits as a custom preset and apply your entire workflow to other images with a single click.
-9/ Standard Editing Tools
-A. Adjustments: Apply professional adjustments like blurring the background, enhancing details, applying warmer lighting, or completely replacing the background with a new scene described by a prompt.
-B. Filters: A wide range of one-click artistic filters (Synthwave, Anime, Noir, etc.) and the ability to describe your own custom filter.
-C. Crop: Standard image cropping with aspect ratio presets (Square, 16:9).
-D. Undo/Redo/Reset: Full history control over your editing session.
-E. Comparison Slider: A draggable slider to compare your current edit with the original image in real-time.
-10/ Image Variations: Generate multiple creative variations from a single image or prompt.
-11/ Generate Animation: Create a short, looping 360-degree rotation animation (MP4 video) from your image.
+<img width="611" height="673" alt="image" src="https://github.com/user-attachments/assets/4fb2d1e7-cc19-4c89-94dc-3056e8664508" />
+
 
 🛠️ Batch Editor: Apply a single filter or adjustment to multiple images at once and download them as a .zip file.
 
@@ -62,4 +48,5 @@ Hardware Requirements:
 🚀 Running Locally (Installation)
 Follow these steps to run the AI Origami Generator v3 of Dayun Design Studio on your local machine.
 
-<img width="461" height="839" alt="image" src="https://github.com/user-attachments/assets/b86b0a78-68d0-4a1a-9751-68b8528a353d" />
+<img width="458" height="839" alt="image" src="https://github.com/user-attachments/assets/06086aa6-5fb9-498f-8c6b-e689790e13bf" />
+
