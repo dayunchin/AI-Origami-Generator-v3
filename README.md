@@ -1,7 +1,8 @@
 Dayun Design Studio: AI Origami Generator & Image Editor
 An AI-powered design studio specializing in origami generation and advanced image editing. Describe any origami concept and watch it come to life, or upload your own images to access a powerful suite of AI-driven editing tools. Built with React and the Google Gemini API.
-![alt text](https://storage.googleapis.com/maker-suite-gallery/images/project-samples/dayun_design_studio_screenshot.png)
-<!-- Replace with your own screenshot -->
+<img width="1254" height="838" alt="image" src="https://github.com/user-attachments/assets/024b350e-e208-4dab-bf7b-043e85a8a350" />
+<!--![alt text](https://storage.googleapis.com/maker-suite-gallery/images/project-samples/dayun_design_studio_screenshot.png)
+ Replace with your own screenshot -->
 ✨ Features
 The application is split into two main modes: a start screen for image generation/selection and a powerful single-image editor.
 🎨 Creative Suite
