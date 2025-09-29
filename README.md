@@ -52,14 +52,15 @@ Follow these steps to run the AI Origami Generator v3 of Dayun Design Studio on 
 <img width="458" height="839" alt="image" src="https://github.com/user-attachments/assets/06086aa6-5fb9-498f-8c6b-e689790e13bf" />
 
 **Reference:**
-__WebStylePress YouTube Channel_ 
+WebStylePress YouTube Channel:
+
 How to Download and Run Project from Github 
 https://youtu.be/jZj3Ua0Ue80?si=n1HW0QNiIc5e2w_4
 
 How to Run Github Code Online 
 https://youtu.be/qnPKoCl6Gcw?si=oBdpLdmEjCpWtzPr 
 
-Note: 
+**Note:** 
 <img width="624" height="354" alt="image" src="https://github.com/user-attachments/assets/900a96b9-874a-4b58-91ea-9c715c55e952" />
 
 If you encounter this error, it means your free plan’s daily quota has been used up. Please try again after upgrading your plan, or return the next day when your quota resets.
