@@ -10,6 +10,7 @@ An AI-powered design studio specializing in origami generation and AI origami im
 
 
 
+
 ✨**Features**
 
 The application is split into three main modes: Text/Prompt-to-Image generation, Image-to-Image selection with a powerful single-image editor, and a Batch Editor for editing multiple generated or uploaded origami images.
@@ -41,6 +42,7 @@ Fully Responsive: A seamless experience on both desktop and mobile devices.
 Keyboard Shortcuts: In addition to improving accessibility and speeding up your workflow, the following shortcuts are specifically available for visually impaired users:
 
 <img width="514" height="512" alt="image" src="https://github.com/user-attachments/assets/497c511c-8909-4322-bf55-60ea7d414e60" />
+
 
 
 
