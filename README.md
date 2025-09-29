@@ -9,6 +9,7 @@ An AI-powered design studio specializing in origami generation and AI origami im
  Replace with your own screenshot -->
 
 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 ✨**Features**
@@ -45,7 +46,7 @@ Keyboard Shortcuts: In addition to improving accessibility and speeding up your 
 
 
 
-
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 ⚙️ **System Requirements**
