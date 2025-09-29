@@ -39,7 +39,7 @@ Multi-language Support: The user interface can be translated into multiple langu
 
 Fully Responsive: A seamless experience on both desktop and mobile devices.
 
-Keyboard Shortcuts: In addition to improving accessibility and speeding up your workflow, the following shortcuts are specifically available for visually impaired users:
+Keyboard Shortcuts: In addition to improving accessibility and speeding up your workflow, the following shortcuts are specifically available for visually impaired users.
 
 <img width="514" height="512" alt="image" src="https://github.com/user-attachments/assets/497c511c-8909-4322-bf55-60ea7d414e60" />
 
