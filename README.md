@@ -73,7 +73,9 @@ The easiest way to run this project online without installing anything locally i
 
 
 🚀 **Running Locally (Installation)**
+
 Follow these steps to run the AI Origami Generator v3 of Dayun Design Studio on your local machine.
+
 
 <img width="458" height="839" alt="image" src="https://github.com/user-attachments/assets/06086aa6-5fb9-498f-8c6b-e689790e13bf" />
 
