@@ -35,6 +35,7 @@ Apply a single filter or adjustment to multiple images at once and download them
 🌐 **Other Features:**
 
 Multi-language Support: The user interface can be translated into multiple languages on the fly.
+
 Fully Responsive: A seamless experience on both desktop and mobile devices.
 
 Keyboard Shortcuts: 
