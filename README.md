@@ -45,6 +45,7 @@ Keyboard Shortcuts: In addition to improving accessibility and speeding up your 
 
 
 
+
 ⚙️ **System Requirements**
 
 **Software Requirements:**
@@ -60,6 +61,15 @@ Keyboard Shortcuts: In addition to improving accessibility and speeding up your 
 -No special hardware (like a dedicated GPU) is needed, as all AI processing is performed in the cloud.
 
 
+🚀 **Running Online**
+
+The easiest way to run this project online without installing anything locally is to use an online development environment. Here are a couple of popular options:
+
+1. StackBlitz: You can go to stackblitz.com, choose "Import from GitHub," and paste the URL of the GitHub repository. StackBlitz will automatically set up the environment and run the application for you, all within your browser.
+
+2. CodeSandbox: Similar to StackBlitz, codesandbox.io allows you to import a GitHub repository and will create a live, running version of the app that you can interact with and edit.
+
+
 🚀 **Running Locally (Installation)**
 Follow these steps to run the AI Origami Generator v3 of Dayun Design Studio on your local machine.
 
@@ -72,8 +82,7 @@ WebStylePress YouTube Channel:
 How to Download and Run Project from Github 
 https://youtu.be/jZj3Ua0Ue80?si=n1HW0QNiIc5e2w_4
 
-How to Run Github Code Online 
-https://youtu.be/qnPKoCl6Gcw?si=oBdpLdmEjCpWtzPr 
+
 
 
 **Note:** 
