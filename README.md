@@ -91,7 +91,8 @@ https://youtu.be/jZj3Ua0Ue80?si=n1HW0QNiIc5e2w_4
 
 
 **Note:** 
-
+1. Please refer to Google’s rules and Pixshop’s Terms and Conditions for information regarding the copyright of origami images generated using this app.
+2.   
 <img width="624" height="354" alt="image" src="https://github.com/user-attachments/assets/900a96b9-874a-4b58-91ea-9c715c55e952" />
 
 If you encounter this error, it means your free plan’s daily quota has been used up. Please try again after upgrading your plan, or return the next day when your quota resets.
